@@ -2,7 +2,7 @@
   "packages": {
     "nevo": {
       "2.2": {
-        "download_url": "https://github.com/cocodekat/Nevo/blob/main/nevo-2.2.zip",
+        "download_url": "https://github.com/cocodekat/Nevo/raw/main/nevo-2.2.zip",
         "sha256": "",
         "description": "Nevo made by modulix",
         "file_name": "nevo.zip",
