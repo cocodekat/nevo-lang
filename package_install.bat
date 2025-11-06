@@ -65,7 +65,7 @@ echo @echo off
 echo SETLOCAL
 echo set "BASE_DIR=%%~dp0"
 echo set "PYTHON_BIN=python"
-echo if exist "%%BASE_DIR%%python\python.exe" set "PYTHON_BIN=%%BASE_DIR%%python\python.exe"
+echo set "PYTHON_BIN=C:\python-nevo\python.exe"
 echo set "PACKAGE_PY=%%BASE_DIR%%package.py"
 echo if not exist "!PACKAGE_PY!" (
 echo     echo ❌ package.py not found!
