@@ -64,11 +64,7 @@ echo ✅ Using Python: %PYTHON_BIN%
 echo @echo off
 echo SETLOCAL
 echo set "BASE_DIR=%%~dp0"
-echo if exist "%%BASE_DIR%%python\python.exe" (
-echo     set "PYTHON_BIN=%%BASE_DIR%%python\python.exe"
-echo ) else (
-echo     set "PYTHON_BIN=python"
-echo )
+echo if exist "%%BASE_DIR%%python\python.exe" (set "PYTHON_BIN=%%BASE_DIR%%python\python.exe") else (set "PYTHON_BIN=python")
 echo set "PACKAGE_PY=%%BASE_DIR%%package.py"
 echo if not exist "!PACKAGE_PY!" (
 echo     echo ❌ package.py not found!
@@ -76,6 +72,7 @@ echo     exit /b 1
 echo )
 echo "!PYTHON_BIN!" "!PACKAGE_PY!" %%*
 ) > "%INSTALL_DIR%\package.bat"
+
 
 echo ✅ Installation complete!
 echo Run your package with: "%INSTALL_DIR%\package.bat" -install nevo
