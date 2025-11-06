@@ -1,44 +1,46 @@
 @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
+
 :: -----------------------------------------------
 :: Variables
 :: -----------------------------------------------
 set "GITHUB_URL=https://github.com/cocodekat/Nevo/raw/main/package.py"
 set "INSTALL_DIR=%USERPROFILE%\package"
-set "PYTHON_DIR=%INSTALL_DIR%\python"
+set "PORTABLE_PYTHON_DIR=%INSTALL_DIR%\python"
+set "SYSTEM_PYTHON=C:\python-nevo\python.exe"
+
 mkdir "%INSTALL_DIR%" 2>nul
 
 echo 📥 Downloading package.py from GitHub …
-
-:: -----------------------------------------------
-:: Download package.py
-:: -----------------------------------------------
 powershell -Command "Invoke-WebRequest -Uri '%GITHUB_URL%' -OutFile '%INSTALL_DIR%\package.py'"
 if not exist "%INSTALL_DIR%\package.py" (
     echo ❌ Failed to download package.py
     exit /b 1
 )
-
 echo ✅ Downloaded Python file: %INSTALL_DIR%\package.py
 
 :: -----------------------------------------------
-:: Download portable Python (example: Windows embeddable 3.12)
+:: Download portable Python (optional fallback)
 :: -----------------------------------------------
 set "PYTHON_ZIP=%INSTALL_DIR%\python-3.12.0-embed.zip"
 echo 📥 Downloading portable Python …
-
 powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.0/python-3.12.0-embed-amd64.zip' -OutFile '%PYTHON_ZIP%'"
-mkdir "%PYTHON_DIR%" 2>nul
-powershell -Command "Expand-Archive -Path '%PYTHON_ZIP%' -DestinationPath '%PYTHON_DIR%' -Force"
+mkdir "%PORTABLE_PYTHON_DIR%" 2>nul
+powershell -Command "Expand-Archive -Path '%PYTHON_ZIP%' -DestinationPath '%PORTABLE_PYTHON_DIR%' -Force"
 del "%PYTHON_ZIP%"
 
 :: -----------------------------------------------
-:: Setup Python executable
+:: Detect Python executable
 :: -----------------------------------------------
-set "PYTHON_BIN=%PYTHON_DIR%\python.exe"
-if not exist "%PYTHON_BIN%" (
-    for %%p in (python python3) do (
-        where %%p >nul 2>nul && set "PYTHON_BIN=%%p"
+if exist "%SYSTEM_PYTHON%" (
+    set "PYTHON_BIN=%SYSTEM_PYTHON%"
+) else (
+    if exist "%PORTABLE_PYTHON_DIR%\python.exe" (
+        set "PYTHON_BIN=%PORTABLE_PYTHON_DIR%\python.exe"
+    ) else (
+        for %%p in (python python3) do (
+            where %%p >nul 2>nul && set "PYTHON_BIN=%%p"
+        )
     )
 )
 
@@ -47,8 +49,10 @@ if not exist "%PYTHON_BIN%" (
     exit /b 1
 )
 
+echo ✅ Using Python: %PYTHON_BIN%
+
 :: -----------------------------------------------
-:: Ensure pip & install requirements
+:: Install dependencies using system Python
 :: -----------------------------------------------
 "%PYTHON_BIN%" -m ensurepip --upgrade
 "%PYTHON_BIN%" -m pip install --upgrade pip setuptools wheel pyinstaller requests
