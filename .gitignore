@@ -1,2 +1,5 @@
-/nevo_zips/
-/install/
+# Ignore the build zip folder
+nevo_zips/
+
+# Ignore install folder
+install/
