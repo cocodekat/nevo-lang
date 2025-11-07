@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
         char cmd[512];
         snprintf(cmd, sizeof(cmd),
             "%s -Wall -std=c99 %s -o %.*s 2>&1",
-            compiler, c_file, (int)(dot - output_file), output_file);
+            compiler, c_file, "auto_var.c", "ban_list.c", (int)(dot - output_file), output_file);
 
 
         FILE *pipe = popen(cmd, "r");

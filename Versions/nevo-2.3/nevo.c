@@ -33,9 +33,9 @@ int main(int argc, char **argv) {
     if (strcmp(mode, "-version") == 0 || strcmp(mode, "--version") == 0) {
         printf("[nevo] Checking version info...");
         #if defined(_WIN32) || defined(_WIN64)
-            printf("[nevo] Version 2.2 Windows");
+            printf("[nevo] Version 2.3 Windows");
         #else
-            printf("[nevo] Version 2.2 MacOS");
+            printf("[nevo] Version 2.3 MacOS");
         #endif
     }
  
