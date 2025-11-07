@@ -10,6 +10,8 @@ TARGET_DIR="$HOME/nevo"
 mkdir -p "$TARGET_DIR/Libraries/Images"
 mkdir -p "$TARGET_DIR/Modes"
 
+ls ../modes/n.c ../auto_var.c ../ban_list.c
+
 # ── Compiling the compiler
 echo "Compiling Nevo Compiler..."
 clang "../nevo.c" -o "$TARGET_DIR/nevo"
