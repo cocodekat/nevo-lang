@@ -227,7 +227,7 @@ int main(int argc, char *argv[]) {
                 compiler, c_file, exe_output);
 
         #else
-            char *dot = strrchr(output_file, '.');
+            dot = strrchr(output_file, '.');
             snprintf(cmd, sizeof(cmd),
                 "%s -Wall -std=c99 %s -o %.*s 2>&1",
                 compiler, c_file, (int)(dot - output_file), output_file);
