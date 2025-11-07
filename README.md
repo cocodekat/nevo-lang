@@ -8,4 +8,3 @@ You are permitted to use and modify Nevo for personal or internal projects. Howe
 By using Nevo, you agree to respect the intellectual property rights of Modulix and comply with these usage terms.
 
 For licensing inquiries, partnerships, or permissions, please contact us on discord, dm @cocodekat.
-
