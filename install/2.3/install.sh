@@ -4,7 +4,7 @@
 # -----------------------------
 # Hardcoded variables
 # -----------------------------
-ZIP_URL="https://github.com/<user>/<repo>/releases/latest/download/package.zip"
+ZIP_URL="https://github.com/cocodekat/Nevo/raw/main/nevo_zips/nevo-2.3.zip"
 DOWNLOADS_DIR="$HOME/Downloads"
 ZIP_NAME="nevo.zip"
 EXTRACT_DIR="package_extracted"
