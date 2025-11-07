@@ -7,9 +7,8 @@
 ZIP_URL="https://github.com/cocodekat/Nevo/raw/main/nevo_zips/nevo-2.3.zip"
 DOWNLOADS_DIR="$HOME/Downloads"
 ZIP_NAME="nevo.zip"
-EXTRACT_DIR="package_extracted"
-# Hardcoded command to run inside extracted folder (adjust this)
-RUN_COMMAND="$DOWNLOADS_DIR/$ZIP_NAME/nevo-2.3/installer/install.sh"
+EXTRACT_DIR="nevo"
+INSTALLER_PATH="$DOWNLOADS_DIR/$EXTRACT_DIR/nevo-2.3/installer/install.sh"
 
 # -----------------------------
 # Download ZIP
@@ -35,19 +34,19 @@ if [ $? -ne 0 ]; then
 fi
 
 # -----------------------------
-# Run command inside extracted folder
+# Run installer
 # -----------------------------
-echo "⚡ Running command inside extracted folder..."
-cd "$DOWNLOADS_DIR/$EXTRACT_DIR" || exit 1
-
-# Hardcoded command
-$RUN_COMMAND
+echo "⚡ Running installer..."
+if [ -f "$INSTALLER_PATH" ]; then
+    chmod +x "$INSTALLER_PATH"
+    "$INSTALLER_PATH"
+else
+    echo "❌ Installer not found at $INSTALLER_PATH"
+    exit 1
+fi
 
 # -----------------------------
-# Cleanup
+# Cleanup (optional)
 # -----------------------------
 echo "🧹 Cleaning up..."
-cd "$DOWNLOADS_DIR" || exit 1
-rm -rf "$ZIP_NAME" "$EXTRACT_DIR"
-
-echo "✅ Done!"
+rm -rf "$DOWNLOADS_DIR/$ZIP_NAME" "$DOWNLOADS_DIR/$EXTRACT_DIR"
