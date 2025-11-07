@@ -305,7 +305,7 @@ int main(int argc, char *argv[]) {
 
 
         pclose(pipe);
-        // remove(c_file);
+        remove(c_file);
 
         if (!has_error)
             printf("Compilation succeeded: %.*s\n", (int)(dot - output_file), output_file);
