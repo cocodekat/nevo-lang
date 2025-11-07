@@ -1,7 +1,9 @@
 #!/bin/bash
-# Simple script to push a single file or directory to GitHub
+# Quiet script to push a single file or directory to GitHub
 
+# -----------------------------
 # Check for arguments
+# -----------------------------
 if [ $# -lt 1 ]; then
     echo "Usage:"
     echo "  ./update.sh <file>"
@@ -9,7 +11,9 @@ if [ $# -lt 1 ]; then
     exit 1
 fi
 
+# -----------------------------
 # Handle directory mode
+# -----------------------------
 if [ "$1" == "-dir" ]; then
     if [ -z "$2" ]; then
         echo "❌ Missing directory argument."
@@ -24,10 +28,9 @@ if [ "$1" == "-dir" ]; then
         exit 1
     fi
 
-    echo "📂 Updating directory: $TARGET"
-    git add "$TARGET"
-    git commit -m "Update directory $TARGET"
-    git push origin main
+    git add "$TARGET" >/dev/null 2>&1
+    git commit -m "Update directory $TARGET" >/dev/null 2>&1
+    git push origin main >/dev/null 2>&1
 else
     TARGET="$1"
 
@@ -36,8 +39,8 @@ else
         exit 1
     fi
 
-    echo "📄 Updating file: $TARGET"
-    git add "$TARGET"
-    git commit -m "Update $TARGET"
-    git push origin main
+    git add "$TARGET" >/dev/null 2>&1
+    git commit -m "Update $TARGET" >/dev/null 2>&1
+    git push origin main >/dev/null 2>&1
 fi
+echo done
