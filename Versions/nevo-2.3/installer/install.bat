@@ -2,7 +2,7 @@
 
 set TARGET_DIR=C:\nevo
 
-set "ZIP_PATH=%TARGET_DIR%\mingw.zip"
+set "ZIP_PATH=%TARGET_DIR%\tcc.zip"
 mkdir C:\nevo\libraries\Images
 mkdir C:\nevo\Modes
 
@@ -31,7 +31,7 @@ echo Current directory: %CD%
 
 REM Compile C files from current dir (nevo-2\)
 C:\nevo\tcc\tcc\tcc.exe nevo.c -o C:\nevo\nevo.exe
-C:\nevo\tcc\tcc\tcc.exe modes\n.c -o C:\nevo\Modes\n.exe
+C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c -o C:\nevo\Modes\n.exe
 
 REM Move header files into C:\nevo\libraries\
 move /y arradd.h C:\nevo\libraries\ >nul 2>&1
