@@ -1,0 +1,13 @@
+int main() {
+    x = carr();
+    arradd(x, _int(10));
+    farr(x);
+
+    int y = 10;
+
+    switch(y) {
+        case(10): {
+            print("yes");
+        }
+    }
+}
