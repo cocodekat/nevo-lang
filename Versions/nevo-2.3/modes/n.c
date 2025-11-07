@@ -211,9 +211,29 @@ int main(int argc, char *argv[]) {
         #endif
 
         char cmd[512];
-        snprintf(cmd, sizeof(cmd),
-            "%s -Wall -std=c99 %s -o %.*s 2>&1",
-            compiler, c_file, (int)(dot - output_file), output_file);
+
+        #if defined(_WIN32) || defined(_WIN64)
+            // Windows: ensure output filename ends with .exe
+            char exe_output[256];
+            strncpy(exe_output, output_file, sizeof(exe_output));
+            exe_output[sizeof(exe_output) - 1] = '\0';
+
+            char *dot = strrchr(exe_output, '.');
+            if (dot) strcpy(dot, ".exe");   // replace extension
+            else strcat(exe_output, ".exe"); // add .exe if no extension
+
+            snprintf(cmd, sizeof(cmd),
+                "%s -Wall -std=c99 %s -o %s 2>&1",
+                compiler, c_file, exe_output);
+
+        #else
+            // macOS / Linux
+            char *dot = strrchr(output_file, '.');
+            snprintf(cmd, sizeof(cmd),
+                "%s -Wall -std=c99 %s -o %.*s 2>&1",
+                compiler, c_file, (int)(dot - output_file), output_file);
+        #endif
+
 
 
         FILE *pipe = popen(cmd, "r");
