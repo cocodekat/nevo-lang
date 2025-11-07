@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
             else strcat(exe_output, ".exe"); // add .exe if no extension
 
             snprintf(cmd, sizeof(cmd),
-                "%s -Wall -std=c99 %s -o %s 2>&1",
+                "%s -Wall -std=c99 %s -o %s",
                 compiler, c_file, exe_output);
 
         #else
