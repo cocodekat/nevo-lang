@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
             strncpy(exe_output, output_file, sizeof(exe_output));
             exe_output[sizeof(exe_output) - 1] = '\0';
 
-            char *dot = strrchr(exe_output, '.');
+            dot = strrchr(exe_output, '.');
             if (dot) strcpy(dot, ".exe");   // replace extension
             else strcat(exe_output, ".exe"); // add .exe if no extension
 
