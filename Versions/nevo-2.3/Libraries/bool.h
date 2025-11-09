@@ -1,7 +1,18 @@
-#include "bool.h"
+#ifndef BOOL_H
+#define BOOL_H
+
 #include <stdio.h>
 
-type type_and(type a, type b) {
+typedef enum {
+    TYPE_FALSE = 0,
+    TYPE_TRUE = 1,
+    TYPE_MAYBE = 2,
+    TYPE_SOMETIMES = 3,
+    TYPE_REPEAT = 4  // "can you repeat the question?"
+} type;
+
+// --- Core logic operators ---
+static inline type type_and(type a, type b) {
     if (a == TYPE_FALSE || b == TYPE_FALSE) return TYPE_FALSE;
     if (a == TYPE_REPEAT || b == TYPE_REPEAT) return TYPE_REPEAT;
     if (a == TYPE_MAYBE || b == TYPE_MAYBE) return TYPE_MAYBE;
@@ -9,7 +20,7 @@ type type_and(type a, type b) {
     return TYPE_TRUE;
 }
 
-type type_or(type a, type b) {
+static inline type type_or(type a, type b) {
     if (a == TYPE_TRUE || b == TYPE_TRUE) return TYPE_TRUE;
     if (a == TYPE_REPEAT || b == TYPE_REPEAT) return TYPE_REPEAT;
     if (a == TYPE_SOMETIMES || b == TYPE_SOMETIMES) return TYPE_SOMETIMES;
@@ -17,7 +28,7 @@ type type_or(type a, type b) {
     return TYPE_FALSE;
 }
 
-type type_not(type a) {
+static inline type type_not(type a) {
     switch (a) {
         case TYPE_TRUE: return TYPE_FALSE;
         case TYPE_FALSE: return TYPE_TRUE;
@@ -28,11 +39,12 @@ type type_not(type a) {
     }
 }
 
-int type_truthy(type v) {
+// --- Utility ---
+static inline int type_truthy(type v) {
     return (v == TYPE_TRUE || v == TYPE_SOMETIMES);
 }
 
-const char* type_to_string(type v) {
+static inline const char* type_to_string(type v) {
     switch (v) {
         case TYPE_TRUE: return "true";
         case TYPE_FALSE: return "false";
@@ -42,3 +54,5 @@ const char* type_to_string(type v) {
         default: return "unknown";
     }
 }
+
+#endif // BOOL_H
