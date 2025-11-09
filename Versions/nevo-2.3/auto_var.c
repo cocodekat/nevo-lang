@@ -80,6 +80,13 @@ const char *infer_type(const char *rhs) {
     if (strstr(buf, "cap")) return "bool";
     if (strstr(buf, "nocap")) return "bool";
 
+    // new bools
+    if (strstr(buf, "cap")) return "bool";
+    if (strstr(buf, "nocap")) return "bool";
+    if (strstr(buf, "maybe")) return "bool";
+    if (strstr(buf, "sometimes")) return "bool";
+    if (strstr(buf, "can you repeat the question")) return "bool";
+
     return "float";
 }
 
