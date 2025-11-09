@@ -22,6 +22,7 @@ echo "Enabling Builtin Functions..."
 mv "../Libraries/arradd.h" "$TARGET_DIR/Libraries"
 mv "../Libraries/h1.h" "$TARGET_DIR/Libraries"
 mv "../Libraries/sha256.h" "$TARGET_DIR/Libraries"
+mv "../Libraries/bool.h" "$TARGET_DIR/Libraries"
 
 mv "../libraries/images/npxm.h" "$TARGET_DIR/Libraries/Images"
 mv "../libraries/images/stb_image_write.h" "$TARGET_DIR/Libraries/Images"
