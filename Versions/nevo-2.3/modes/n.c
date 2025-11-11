@@ -200,19 +200,9 @@ int main(int argc, char *argv[]) {
         int needs_type = 0;
 
         for (int i = 0; i < num_lines; i++) {
-            if (strstr(lines[i], "maybe") || strstr(lines[i], "sometimes") || strstr(lines[i], "can you repeat the question?")) {
-            needs_type = 1;
-            break;
-        }
             fprintf(out, "%s\n", lines[i]);
             free(lines[i]);
         }
-        if (needs_type)
-            #if defined(_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\libraries\\bool.h\"\n");
-            #else
-                fprintf(out, "#include \"%s/nevo/libraries/bool.h\"\n", getenv("HOME"));
-            #endif
 
         fclose(out);
 
