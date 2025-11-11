@@ -3,6 +3,11 @@
 
 #include <stdio.h>
 
+#define maybe TYPE_MAYBE
+#define sometimes TYPE_SOMETIMES
+#define repeat TYPE_REPEAT
+
+
 typedef enum {
     TYPE_FALSE = 0,
     TYPE_TRUE = 1,
