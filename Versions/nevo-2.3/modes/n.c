@@ -197,6 +197,14 @@ int main(int argc, char *argv[]) {
         if (needed.cap_defined) fprintf(out, "#define cap false\n");
         if (needed.nocap_defined) fprintf(out, "#define nocap true\n");
 
+        if (needed.bool_defined) {
+        #if defined(_WIN32) || defined(_WIN64)
+            fprintf(out, "#include \"C:\\nevo\\libraries\\bool.h\"\n");
+        #else
+            fprintf(out, "#include \"%s/nevo/libraries/bool.h\"\n", getenv("HOME"));
+        #endif
+        }
+
         int needs_type = 0;
 
         for (int i = 0; i < num_lines; i++) {
@@ -269,6 +277,7 @@ int main(int argc, char *argv[]) {
             if (needed.sha256) header_lines++;
             if (needed.npxm) header_lines++;
             if (needed.be_defined) header_lines += 3; // be, cap, nocap
+            if (needed.bool_defined) header_lines++;
 
             int orig_line = line_num - header_lines;
             if (orig_line < 1) orig_line = 1;
