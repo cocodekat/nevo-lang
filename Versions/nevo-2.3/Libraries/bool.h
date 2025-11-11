@@ -3,18 +3,23 @@
 
 #include <stdio.h>
 
-#define maybe TYPE_MAYBE
-#define sometimes TYPE_SOMETIMES
-#define repeat TYPE_REPEAT
-
-
+#ifndef bool
 typedef enum {
     TYPE_FALSE = 0,
     TYPE_TRUE = 1,
     TYPE_MAYBE = 2,
     TYPE_SOMETIMES = 3,
-    TYPE_REPEAT = 4  // "can you repeat the question?"
+    TYPE_REPEAT = 4
 } type;
+
+#define bool type
+#define true TYPE_TRUE
+#define false TYPE_FALSE
+#define maybe TYPE_MAYBE
+#define sometimes TYPE_SOMETIMES
+#define repeat TYPE_REPEAT
+#endif
+
 
 // --- Core logic operators ---
 static inline type type_and(type a, type b) {
