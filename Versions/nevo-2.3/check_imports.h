@@ -12,7 +12,6 @@ typedef struct {
     bool ctype;
     bool time;
     bool assert;
-    bool stdbool;
     bool arradd;
     bool h1;
     bool sha256;
@@ -31,7 +30,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     out->ctype = false;
     out->time = false;
     out->assert = false;
-    out->stdbool = false;
     out->arradd = false;
     out->h1 = false;
     out->sha256 = false;
@@ -48,7 +46,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     const char *ctype_funcs[] = {"isalnum","isalpha","isdigit","islower","isupper","isspace","tolower","toupper"};
     const char *time_funcs[] = {"time","clock","difftime","mktime","strftime","localtime","gmtime"};
     const char *assert_funcs[] = {"assert"};
-    const char *stdbool_funcs[] = {"bool","true","false", "cap", "nocap"};
     const char* arradd_funcs[] = {"arradd","parr","farr","_int","_str","float","double","char","bool","carr"};
     const char* h1_funcs[] = {"h1"};
     const char* sha256_funcs[] = {"sha256"};
@@ -82,9 +79,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
 
         for (int j = 0; j < sizeof(assert_funcs)/sizeof(assert_funcs[0]); j++)
             if (strstr(line, assert_funcs[j])) out->assert = true;
-
-        for (int j = 0; j < sizeof(stdbool_funcs)/sizeof(stdbool_funcs[0]); j++)
-            if (strstr(line, stdbool_funcs[j])) out->stdbool = true;
 
         // #----Builtin funcs
 

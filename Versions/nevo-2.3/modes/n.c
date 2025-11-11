@@ -162,7 +162,6 @@ int main(int argc, char *argv[]) {
         if (needed.ctype) fprintf(out, "#include <ctype.h>\n");
         if (needed.time) fprintf(out, "#include <time.h>\n");
         if (needed.assert) fprintf(out, "#include <assert.h>\n");
-        if (needed.stdbool) fprintf(out, "#include <stdbool.h>\n");
 
         if (needed.arradd) {
         #if defined(_WIN32) || defined(_WIN64)
@@ -271,7 +270,6 @@ int main(int argc, char *argv[]) {
             if (needed.ctype) header_lines++;
             if (needed.time) header_lines++;
             if (needed.assert) header_lines++;
-            if (needed.stdbool) header_lines++;
             if (needed.arradd) header_lines++;
             if (needed.h1) header_lines++;
             if (needed.sha256) header_lines++;
