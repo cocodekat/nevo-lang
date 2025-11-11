@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Logic Gate Simulator — Ports & Space-drag Wires</title>
+<style>
+  :root { --port-size:12px; --port-hit:18px; }
+  body { font-family: sans-serif; margin:0; display:flex; height:100vh; overflow:hidden; }
+  #toolbar { width:170px; background:#eee; padding:12px; box-sizing:border-box; }
+  #toolbar div { background:#ccc; margin:6px 0; padding:10px; cursor:grab; text-align:center; user-select:none; }
+  #canvas { flex:1; position:relative; background:#f8f8f8; overflow:hidden; }
+  .gate, .switch, .output, .relay {
+    position:absolute; padding:12px 14px; background:#fff; border:2px solid #333; cursor:grab; text-align:center; user-select:none;
+    width:100px; height:48px; box-sizing:border-box; border-radius:6px;
+  }
+  .relay { width:120px; height:64px; }
+  .switch.on, .relay.on { background: #fffb9c; }
+  .output.on { background: #bfffbf; }
+  svg { position:absolute; top:0; left:0; pointer-events:none; width:100%; height:100%; }
+  line { stroke:#c0392b; stroke-width:4; stroke-linecap:round; }
+  .port {
+    position:absolute; width:var(--port-size); height:var(--port-size); border-radius:50%;
+    background:#666; border:2px solid #333; transform:translate(-50%,-50%);
+    box-sizing:border-box; pointer-events:auto;
+  }
+  .port.hover { background: #2ecc71; box-shadow:0 0 6px rgba(46,204,113,0.6); }
+  .port.out { background:#444; }
+  .label { font-size:12px; pointer-events:none; }
+  /* smaller, so dragging isn't awkward */
+  .gate .label, .relay .label { display:block; margin-top:6px; }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div draggable="true" data-type="SWITCH">Switch</div>
+  <div draggable="true" data-type="AND">AND</div>
+  <div draggable="true" data-type="OR">OR</div>
+  <div draggable="true" data-type="NOT">NOT</div>
+  <div draggable="true" data-type="OUTPUT">Output</div>
+  <div draggable="true" data-type="RELAY">Relay</div>
+  <p style="font-size:12px;color:#444;margin-top:14px">
+    Controls:<br>
+    Right-click-drag or hold <b>Space</b> + left-drag to draw wires.<br>
+    Shift+Click a node to delete.
+  </p>
+</div>
+
+<div id="canvas">
+  <svg></svg>
+</div>
+
+<script>
+/* ---- Globals ---- */
+const canvas = document.getElementById('canvas');
+const svg = canvas.querySelector('svg');
+let idCounter = 0;
+const elements = {};   // id -> { id, type, el, ports: {name:portEl,...} }
+const connections = []; // { from:{id,port}, to:{id,port} }
+let wiring = null;     // {from:{id,port}, mouse:{x,y}, nearest:{id,port,el}}
+let ctrlDown = false;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Control') ctrlDown = true;
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'Control') ctrlDown = false;
+});
+
+
+
+/* Disable context menu on canvas */
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---- Toolbar drag/drop ---- */
+document.querySelectorAll('#toolbar div').forEach(btn=>{
+  btn.addEventListener('dragstart', e => e.dataTransfer.setData('type', btn.dataset.type));
+});
+canvas.addEventListener('dragover', e => e.preventDefault());
+canvas.addEventListener('drop', e => {
+  const type = e.dataTransfer.getData('type');
+  const rect = canvas.getBoundingClientRect();
+  addElement(type, e.clientX - rect.left - 50, e.clientY - rect.top - 24);
+});
+
+/* ---- Helper: create ports spec per type ----
+   Ports are objects with: name, side ('left'|'right'|'top'|'bottom'|'center'), role 'in'|'out'
+*/
+function getPortsForType(type){
+  if (type==='AND' || type==='OR') {
+    return [
+      {name:'in1', side:'left', role:'in', yFactor:0.33},
+      {name:'in2', side:'left', role:'in', yFactor:0.66},
+      {name:'out', side:'right', role:'out', yFactor:0.5}
+    ];
+  }
+  if (type==='NOT') {
+    return [
+      {name:'in', side:'left', role:'in', yFactor:0.5},
+      {name:'out', side:'right', role:'out', yFactor:0.5}
+    ];
+  }
+  if (type==='SWITCH') {
+    return [
+      {name:'out', side:'right', role:'out', yFactor:0.5}
+    ];
+  }
+  if (type==='OUTPUT') {
+    return [
+      {name:'in', side:'left', role:'in', yFactor:0.5}
+    ];
+  }
+  if (type==='RELAY') {
+    // inputs on left: top = 'top' (y 0.25), bottom = 'bottom' (y 0.75)
+    // outputs on right: top = 'top' (y 0.25), bottom = 'bottom' (y 0.75)
+    return [
+      {name:'top', side:'left', role:'in', yFactor:0.25},
+      {name:'bottom', side:'left', role:'in', yFactor:0.75},
+      {name:'top', side:'right', role:'out', yFactor:0.25},
+      {name:'bottom', side:'right', role:'out', yFactor:0.75}
+    ];
+  }
+  // fallback single center output
+  return [{name:'out', side:'right', role:'out', yFactor:0.5}];
+}
+
+/* ---- Add element to canvas ---- */
+function addElement(type, x, y){
+  const id = 'el' + (idCounter++);
+  const el = document.createElement('div');
+  el.classList.add(type.toLowerCase());
+  el.classList.add(type);
+  el.dataset.id = id;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+
+  // label
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = type;
+  el.appendChild(label);
+
+  canvas.appendChild(el);
+
+  // special init
+  if (type==='SWITCH') {
+    el.classList.add('switch');
+    el.dataset.state = '0';
+    el.addEventListener('click', e=>{
+      if (e.shiftKey) { removeElement(id); return; }
+      el.dataset.state = el.dataset.state === '0' ? '1' : '0';
+      el.classList.toggle('on', el.dataset.state === '1');
+      simulate();
+    });
+  } else if (type==='OUTPUT') {
+    el.classList.add('output');
+  } else if (type==='RELAY') {
+    el.classList.add('relay');
+  } else {
+    el.classList.add('gate');
+  }
+
+  // allow shift+click to delete
+  el.addEventListener('click', e=>{ if (e.shiftKey) removeElement(id); });
+
+  // create ports
+  const portsSpec = getPortsForType(type);
+  const ports = {};
+  portsSpec.forEach((pSpec, idx)=>{
+    const p = document.createElement('div');
+    p.className = 'port' + (pSpec.role==='out' ? ' out' : '');
+    p.dataset.el = id;
+    p.dataset.port = pSpec.name;
+    p.dataset.role = pSpec.role;
+    // positioning: based on side and yFactor
+    // We'll set absolute positions using percentage relative to element size
+    const leftPct = pSpec.side === 'left' ? 0 : (pSpec.side === 'right' ? 100 : 50);
+    const topPct = (pSpec.yFactor || 0.5) * 100;
+    p.style.left = leftPct + '%';
+    p.style.top = topPct + '%';
+    p.title = `${pSpec.role} ${pSpec.name}`;
+    // start wire on this port (right-click or space+left)
+    p.addEventListener('mousedown', portMouseDown);
+    el.appendChild(p);
+    ports[pSpec.name + (pSpec.side === 'right' && pSpec.role==='out' ? '-outside' : '')] = p; // not used, but keep object
+    ports[pSpec.name + '@' + pSpec.side + '@' + pSpec.role] = p; // also not required externally
+    // simpler map: map by port name (if duplicates like relay top appear twice, we'll distinguish by role+side when connecting)
+    // store the port element keyed by name+side+role in element. We'll create a small mapping below.
+  });
+
+  // build a map for quick lookup: element.ports = { "<portName>|<side>|<role>" : portEl }
+  const portMap = {};
+  portsSpec.forEach(p=>{
+    const key = `${p.name}|${p.side}|${p.role}`; // e.g. "in1|left|in" or "top|right|out"
+    const portEl = Array.from(el.querySelectorAll('.port')).find(pe => pe.dataset.port===p.name && pe.dataset.role===p.role);
+    if (portEl) portMap[key] = portEl;
+  });
+
+  // save element record
+  elements[id] = { id, type, el, portsSpec, portMap };
+
+  // make draggable (but avoid starting drag if clicking on a port)
+  makeDraggable(el);
+
+  // clicking element (non-port) toggles delete when shift already handled
+  // allow starting wire from non-port by right-click too - we'll detect nearest port automatically
+  el.addEventListener('mousedown', nodeMouseDown);
+
+  simulate();
+}
+
+/* ---- Make element draggable (skip port clicks) ---- */
+function makeDraggable(el){
+  let offsetX = 0, offsetY = 0;
+  el.addEventListener('mousedown', e=>{
+    // don't start dragging if clicking on a port (ports handle their own mousedown)
+    if (e.target.classList.contains('port')) return;
+    if (e.button !== 0 || e.shiftKey) return;
+    const rect = el.getBoundingClientRect();
+    const cRect = canvas.getBoundingClientRect();
+    offsetX = e.clientX - rect.left;
+    offsetY = e.clientY - rect.top;
+
+    function onMove(ev){
+      el.style.left = (ev.clientX - cRect.left - offsetX) + 'px';
+      el.style.top = (ev.clientY - cRect.top - offsetY) + 'px';
+      updateWires();
+    }
+    function onUp(){
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+
+/* ---- Remove element and its connections ---- */
+function removeElement(id){
+  // remove related connections
+  for (let i = connections.length - 1; i >= 0; i--) {
+    if (connections[i].from.id === id || connections[i].to.id === id) connections.splice(i,1);
+  }
+  const e = elements[id];
+  if (!e) return;
+  e.el.remove();
+  delete elements[id];
+  updateWires();
+  simulate();
+}
+
+/* ---- Port & node mousedown handlers to start wiring ---- */
+function portMouseDown(e){
+  // start wiring from this port
+  const portEl = e.currentTarget;
+  const elId = portEl.dataset.el;
+  const portName = portEl.dataset.port;
+  const role = portEl.dataset.role; // 'in' or 'out'
+  // start when right-click OR when ctrlDown+left-click
+  if (e.button === 2 || (e.button === 0 && ctrlDown)){
+    e.preventDefault();
+    wiring = { from: { id: elId, port: portName, role }, mouse: { x: e.clientX, y: e.clientY }, nearest: null };
+    document.addEventListener('mousemove', onWireMove);
+    document.addEventListener('mouseup', onWireUp);
+    updateWires(e.clientX, e.clientY);
+  }
+}
+
+function nodeMouseDown(e){
+  // allow starting a wire by right-clicking on the node body: we will snap start to nearest output port automatically
+  if (e.button === 2) {
+    e.preventDefault();
+    const el = e.currentTarget;
+    // find nearest output port on this element, prefer out ports; fallback to any port
+    const outPorts = Array.from(el.querySelectorAll('.port')).filter(p=>p.dataset.role==='out');
+    const ports = outPorts.length ? outPorts : Array.from(el.querySelectorAll('.port'));
+    if (ports.length === 0) return;
+    // choose closest port to mouse
+    const mouse = { x: e.clientX, y: e.clientY };
+    let nearest = null, dmin = Infinity;
+    ports.forEach(p=>{
+      const r = p.getBoundingClientRect();
+      const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      const d = (cx-mouse.x)**2 + (cy-mouse.y)**2;
+      if (d < dmin) { dmin = d; nearest = p; }
+    });
+    const portName = nearest.dataset.port, role = nearest.dataset.role;
+    wiring = { from: { id: nearest.dataset.el, port: portName, role }, mouse:{x:e.clientX,y:e.clientY}, nearest:null };
+    document.addEventListener('mousemove', onWireMove);
+    document.addEventListener('mouseup', onWireUp);
+    updateWires(e.clientX, e.clientY);
+  }
+}
+
+/* ---- Wire dragging events ---- */
+function onWireMove(e){
+  wiring.mouse.x = e.clientX;
+  wiring.mouse.y = e.clientY;
+  // find nearest port in whole canvas within threshold
+  const threshold = 28; // pixels
+  let nearest = null;
+  let dmin = threshold*threshold + 1;
+  Object.values(elements).forEach(elRec=>{
+    const portEls = elRec.el.querySelectorAll('.port');
+    portEls.forEach(p=>{
+      // skip connecting to the same port we started from
+      if (p.dataset.el === wiring.from.id && p.dataset.port === wiring.from.port && p.dataset.role === wiring.from.role) return;
+      const r = p.getBoundingClientRect();
+      const cx = r.left + r.width/2, cy = r.top + r.height/2;
+      const d = (cx - e.clientX)**2 + (cy - e.clientY)**2;
+      if (d < dmin) { dmin = d; nearest = p; }
+    });
+  });
+  // update nearest highlight
+  document.querySelectorAll('.port.hover').forEach(p=>p.classList.remove('hover'));
+  if (nearest){
+    nearest.classList.add('hover');
+    wiring.nearest = { id: nearest.dataset.el, port: nearest.dataset.port, role: nearest.dataset.role, el: nearest };
+  } else {
+    wiring.nearest = null;
+  }
+  updateWires(e.clientX, e.clientY);
+}
+
+function onWireUp(e){
+  document.removeEventListener('mousemove', onWireMove);
+  document.removeEventListener('mouseup', onWireUp);
+  // if we have a nearest port, create connection
+  if (wiring && wiring.nearest){
+    // create connection from wiring.from -> wiring.nearest
+    // allow connecting either way (from out->in is natural, but user may connect in->out; keep generic)
+    connections.push({
+      from: { id: wiring.from.id, port: wiring.from.port, role: wiring.from.role },
+      to:   { id: wiring.nearest.id, port: wiring.nearest.port, role: wiring.nearest.role }
+    });
+  }
+  // cleanup highlight & temp wire
+  document.querySelectorAll('.port.hover').forEach(p=>p.classList.remove('hover'));
+  wiring = null;
+  updateWires();
+  simulate();
+}
+
+/* ---- Utilities for drawing wires ---- */
+function getPortCenter(elId, portName, role){
+  const elRec = elements[elId];
+  if (!elRec) return null;
+  // find port element matching name and (if multiple like relay, match role and side by dataset)
+  const portEls = Array.from(elRec.el.querySelectorAll('.port')).filter(p => p.dataset.port === portName);
+  let chosen = null;
+  if (portEls.length === 1) chosen = portEls[0];
+  else {
+    // prefer matching role if provided, else first
+    chosen = portEls.find(p=>p.dataset.role===role) || portEls[0];
+  }
+  if (!chosen) return null;
+  const r = chosen.getBoundingClientRect();
+  const cRect = canvas.getBoundingClientRect();
+  return { x: r.left + r.width/2 - cRect.left, y: r.top + r.height/2 - cRect.top };
+}
+
+function getMousePosRelative(mouseX, mouseY){
+  const cRect = canvas.getBoundingClientRect();
+  return { x: mouseX - cRect.left, y: mouseY - cRect.top };
+}
+
+/* ---- Draw lines: existing connections + temp wire ---- */
+function updateWires(mouseX, mouseY){
+  svg.innerHTML = '';
+  const cRect = canvas.getBoundingClientRect();
+
+  // draw permanent connections
+  connections.forEach(c=>{
+    const p1 = getPortCenter(c.from.id, c.from.port, c.from.role);
+    const p2 = getPortCenter(c.to.id, c.to.port, c.to.role);
+    if (!p1 || !p2) return;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1', p1.x);
+    line.setAttribute('y1', p1.y);
+    line.setAttribute('x2', p2.x);
+    line.setAttribute('y2', p2.y);
+    svg.appendChild(line);
+  });
+
+  // draw temporary wiring if present
+  if (wiring){
+    const fromP = getPortCenter(wiring.from.id, wiring.from.port, wiring.from.role);
+    const mousePos = getMousePosRelative(mouseX || wiring.mouse.x, mouseY || wiring.mouse.y);
+    let toX = mousePos.x, toY = mousePos.y;
+    if (wiring.nearest){
+      const np = getPortCenter(wiring.nearest.id, wiring.nearest.port, wiring.nearest.role);
+      if (np){ toX = np.x; toY = np.y; }
+    }
+    if (fromP){
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', fromP.x);
+      line.setAttribute('y1', fromP.y);
+      line.setAttribute('x2', toX);
+      line.setAttribute('y2', toY);
+      line.setAttribute('stroke-dasharray','6,4');
+      svg.appendChild(line);
+    }
+  }
+}
+
+/* ---- Simulation ---- */
+function simulate(){
+  const values = {}; // store values by keys: elId (for single output gates) and elId-portName for port-specific outputs
+
+  // set switch outputs
+  Object.values(elements).forEach(elRec=>{
+    if (elRec.type === 'SWITCH'){
+      const v = elRec.el.dataset.state === '1';
+      values[elRec.id + '-out'] = v;
+      values[elRec.id] = v; // convenience
+    }
+  });
+
+  let changed = true;
+  while (changed){
+    changed = false;
+    Object.values(elements).forEach(elRec=>{
+      const type = elRec.type;
+      if (type === 'AND' || type === 'OR' || type === 'NOT' || type === 'RELAY'){
+        if (type === 'RELAY'){
+          // compute inputs to relay from connections where to.id === elRec.id and to.port === 'top' or 'bottom'
+          let topIn = false, bottomIn = false;
+          connections.forEach(c=>{
+            if (c.to.id === elRec.id){
+              const val = (values[c.from.id + '-' + c.from.port] !== undefined) ? values[c.from.id + '-' + c.from.port] : (values[c.from.id] || false);
+              if (c.to.port === 'top') topIn = topIn || val;
+              if (c.to.port === 'bottom') bottomIn = bottomIn || val;
+            }
+          });
+          // relay logic (kept as requested):
+          // bottom only -> top output
+          // bottom + top -> bottom output
+          let topOut = false, bottomOut = false;
+          if (bottomIn && !topIn) topOut = true;
+          if (bottomIn && topIn) bottomOut = true;
+          // save values
+          values[elRec.id + '-top'] = topOut;
+          values[elRec.id + '-bottom'] = bottomOut;
+          // convenience also set top/bottom specific as keys
+          // mark changed? For simplicity, we can skip change detection for relay outputs (ok)
+          elRec.el.classList.toggle('on', topOut || bottomOut);
+          return;
+        }
+
+        // For logic gates, gather inputs by inspecting connections that target this element
+        const ins = connections.filter(c => c.to.id === elRec.id).map(c=>{
+          const k = c.from.id + '-' + c.from.port;
+          return (values[k] !== undefined) ? values[k] : (values[c.from.id] !== undefined ? values[c.from.id] : false);
+        });
+        if (ins.length === 0 && type !== 'NOT') return;
+        let newVal;
+        if (type === 'AND') newVal = ins.every(v=>v);
+        if (type === 'OR') newVal = ins.some(v=>v);
+        if (type === 'NOT') {
+          // NOT uses first available input (connected to its 'in' port)
+          const inVal = ins[0] || false;
+          newVal = !inVal;
+        }
+        // store output to out port and as convenience at elId
+        if (values[elRec.id] !== newVal || values[elRec.id + '-out'] !== newVal){
+          values[elRec.id] = newVal;
+          values[elRec.id + '-out'] = newVal;
+          changed = true;
+        }
+      }
+    });
+  }
+
+  // Evaluate outputs (visual)
+  Object.values(elements).forEach(elRec=>{
+    if (elRec.type === 'OUTPUT'){
+      const ins = connections.filter(c => c.to.id === elRec.id).map(c=>{
+        const k = c.from.id + '-' + c.from.port;
+        return (values[k] !== undefined) ? values[k] : (values[c.from.id] !== undefined ? values[c.from.id] : false);
+      });
+      const val = ins.some(v=>v);
+      elRec.el.classList.toggle('on', val);
+    }
+    // also update gates' visual for single-output gates
+    if (elRec.type === 'AND' || elRec.type === 'OR' || elRec.type === 'NOT'){
+      const outVal = values[elRec.id] || false;
+      elRec.el.classList.toggle('on', !!outVal);
+    }
+    if (elRec.type === 'SWITCH'){
+      const v = elRec.el.dataset.state === '1';
+      elRec.el.classList.toggle('on', v);
+    }
+  });
+
+  // redraw wires since some values changed (not strictly necessary)
+  updateWires();
+}
+
+/* ---- Initialization: add a few sample elements for convenience ---- */
+addElement('SWITCH', 40, 40);
+addElement('SWITCH', 40, 120);
+addElement('RELAY', 260, 80);
+addElement('AND', 480, 60);
+addElement('OUTPUT', 700, 70);
+
+/* ---- Make sure canvas mousemove updates temp line even when not over port (for better UX) ---- */
+canvas.addEventListener('mousemove', e => {
+  if (wiring) onWireMove(e);
+});
+
+/* ---- When window resizes, update wires ---- */
+window.addEventListener('resize', updateWires);
+
+/* ---- Prevent text selection while dragging with space (UX nicety) ---- */
+window.addEventListener('mousedown', e => {
+  if (ctrlDown && e.button === 0) e.preventDefault();
+});
+
+</script>
+</body>
+</html>
