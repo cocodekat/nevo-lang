@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Logic Gate Simulator — Save & Load + Select & Copy</title>
+<style>
+  :root { --port-size:12px; --port-hit:18px; }
+  body { font-family: sans-serif; margin:0; display:flex; height:100vh; overflow:hidden; }
+  #toolbar { width:180px; background:#eee; padding:12px; box-sizing:border-box; }
+  #toolbar div { background:#ccc; margin:6px 0; padding:10px; cursor:grab; text-align:center; user-select:none; }
+  #canvas { flex:1; position:relative; background:#f8f8f8; overflow:hidden; }
+  .gate, .switch, .output, .relay {
+    position:absolute; padding:12px 14px; background:#fff; border:2px solid #333; cursor:grab; text-align:center; user-select:none;
+    width:100px; height:48px; box-sizing:border-box; border-radius:6px;
+  }
+  .relay { width:120px; height:64px; }
+  .switch.on, .relay.on { background: #fffb9c; }
+  .output.on { background: #bfffbf; }
+  svg { position:absolute; top:0; left:0; pointer-events:none; width:100%; height:100%; }
+  line { stroke:#c0392b; stroke-width:4; stroke-linecap:round; }
+  .port {
+    position:absolute; width:var(--port-size); height:var(--port-size); border-radius:50%;
+    background:#666; border:2px solid #333; transform:translate(-50%,-50%);
+    box-sizing:border-box; pointer-events:auto;
+  }
+  .port.hover { background: #2ecc71; box-shadow:0 0 6px rgba(46,204,113,0.6); }
+  .port.out { background:#444; }
+  .label { font-size:12px; pointer-events:none; }
+  button { width:100%; margin-top:8px; padding:6px; cursor:pointer; }
+  .selected { outline:3px dashed #2980b9; }
+  #selectionBox {
+    position:absolute;
+    border:1px dashed #3498db;
+    background:rgba(52,152,219,0.1);
+    pointer-events:none;
+    display:none;
+  }
+</style>
+</head>
+<body>
+
+<div id="toolbar">
+  <div draggable="true" data-type="SWITCH">Switch</div>
+  <div draggable="true" data-type="AND">AND</div>
+  <div draggable="true" data-type="OR">OR</div>
+  <div draggable="true" data-type="NOT">NOT</div>
+  <div draggable="true" data-type="OUTPUT">Output</div>
+  <div draggable="true" data-type="RELAY">Relay</div>
+
+  <button id="exportBtn">Export</button>
+  <button id="importBtn">Import</button>
+  <input type="file" id="importFile" accept=".json" style="display:none">
+
+  <p style="font-size:12px;color:#444;margin-top:14px">
+    Controls:<br>
+    Right-click-drag or hold <b>Ctrl</b> + left-drag to draw wires.<br>
+    Shift+Click a node to delete.<br>
+    Click-drag empty space to select.<br>
+    Ctrl+C / Ctrl+V to copy/paste.
+  </p>
+</div>
+
+<div id="canvas">
+  <svg></svg>
+  <div id="selectionBox"></div>
+</div>
+
+<script>
+/* ---- Globals ---- */
+const canvas = document.getElementById('canvas');
+const svg = canvas.querySelector('svg');
+const selectionBox = document.getElementById('selectionBox');
+let idCounter = 0;
+const elements = {};
+const connections = [];
+let wiring = null;
+let ctrlDown = false;
+let selectedIds = new Set();
+let copiedData = null;
+
+document.addEventListener('keydown', e => { if (e.key === 'Control') ctrlDown = true; });
+document.addEventListener('keyup', e => { if (e.key === 'Control') ctrlDown = false; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+/* ---- Toolbar ---- */
+document.querySelectorAll('#toolbar div[data-type]').forEach(btn=>{
+  btn.addEventListener('dragstart', e => e.dataTransfer.setData('type', btn.dataset.type));
+});
+canvas.addEventListener('dragover', e => e.preventDefault());
+canvas.addEventListener('drop', e => {
+  const type = e.dataTransfer.getData('type');
+  const rect = canvas.getBoundingClientRect();
+  addElement(type, e.clientX - rect.left - 50, e.clientY - rect.top - 24);
+});
+
+/* ---- Port Definitions ---- */
+function getPortsForType(type){
+  if (type==='AND' || type==='OR')
+    return [
+      {name:'in1', side:'left', role:'in', yFactor:0.33},
+      {name:'in2', side:'left', role:'in', yFactor:0.66},
+      {name:'out', side:'right', role:'out', yFactor:0.5}
+    ];
+  if (type==='NOT')
+    return [
+      {name:'in', side:'left', role:'in', yFactor:0.5},
+      {name:'out', side:'right', role:'out', yFactor:0.5}
+    ];
+  if (type==='SWITCH') return [{name:'out', side:'right', role:'out', yFactor:0.5}];
+  if (type==='OUTPUT') return [{name:'in', side:'left', role:'in', yFactor:0.5}];
+  if (type==='RELAY') return [
+    {name:'top', side:'left', role:'in', yFactor:0.25},
+    {name:'bottom', side:'left', role:'in', yFactor:0.75},
+    {name:'top', side:'right', role:'out', yFactor:0.25},
+    {name:'bottom', side:'right', role:'out', yFactor:0.75}
+  ];
+  return [{name:'out', side:'right', role:'out', yFactor:0.5}];
+}
+
+/* ---- Add Element ---- */
+function addElement(type, x, y, idOpt, stateOpt){
+  const id = idOpt || 'el' + (idCounter++);
+  const el = document.createElement('div');
+  el.classList.add(type.toLowerCase(), type);
+  el.dataset.id = id;
+  el.style.left = x + 'px';
+  el.style.top = y + 'px';
+  const label = document.createElement('div');
+  label.className = 'label';
+  label.textContent = type;
+  el.appendChild(label);
+  canvas.appendChild(el);
+
+  if (type==='SWITCH') {
+    el.classList.add('switch');
+    el.dataset.state = stateOpt || '0';
+    el.addEventListener('click', e=>{
+      if (e.shiftKey) { removeElement(id); return; }
+      if (!e.target.classList.contains('port')) {
+        el.dataset.state = el.dataset.state === '0' ? '1' : '0';
+        el.classList.toggle('on', el.dataset.state === '1');
+        simulate();
+      }
+    });
+  } else if (type==='OUTPUT') el.classList.add('output');
+  else if (type==='RELAY') el.classList.add('relay');
+  else el.classList.add('gate');
+
+  el.addEventListener('click', e=>{ if (e.shiftKey) removeElement(id); });
+
+  const portsSpec = getPortsForType(type);
+  const portMap = {};
+  portsSpec.forEach(pSpec=>{
+    const p = document.createElement('div');
+    p.className = 'port' + (pSpec.role==='out'?' out':'');
+    p.dataset.el = id;
+    p.dataset.port = pSpec.name;
+    p.dataset.role = pSpec.role;
+    const leftPct = pSpec.side==='left'?0:(pSpec.side==='right'?100:50);
+    const topPct = (pSpec.yFactor||0.5)*100;
+    p.style.left = leftPct + '%';
+    p.style.top = topPct + '%';
+    p.addEventListener('mousedown', portMouseDown);
+    el.appendChild(p);
+    portMap[`${pSpec.name}|${pSpec.side}|${pSpec.role}`] = p;
+  });
+  elements[id] = { id, type, el, portsSpec, portMap };
+  makeDraggable(el);
+  el.addEventListener('mousedown', nodeMouseDown);
+  simulate();
+}
+
+/* ---- Make Draggable ---- */
+function makeDraggable(el){
+  let offsetX=0, offsetY=0;
+  el.addEventListener('mousedown', e=>{
+    if (e.target.classList.contains('port')) return;
+    if (e.button!==0 || e.shiftKey) return;
+    const id = el.dataset.id;
+    if (!selectedIds.has(id)) {
+      clearSelection();
+      selectElement(id);
+    }
+    const rect = el.getBoundingClientRect(), cRect=canvas.getBoundingClientRect();
+    offsetX=e.clientX-rect.left; offsetY=e.clientY-rect.top;
+    const startPositions = Array.from(selectedIds).map(id=>{
+      const elem=elements[id].el;
+      return {id, x:parseFloat(elem.style.left), y:parseFloat(elem.style.top)};
+    });
+    function onMove(ev){
+      const dx = ev.clientX - e.clientX;
+      const dy = ev.clientY - e.clientY;
+      startPositions.forEach(sp=>{
+        const elem=elements[sp.id].el;
+        elem.style.left = (sp.x + dx) + 'px';
+        elem.style.top  = (sp.y + dy) + 'px';
+      });
+      updateWires();
+    }
+    function onUp(){
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  });
+}
+
+/* ---- Selection ---- */
+function selectElement(id){
+  selectedIds.add(id);
+  elements[id]?.el.classList.add('selected');
+}
+function clearSelection(){
+  selectedIds.forEach(id=>{
+    if (elements[id]) elements[id].el.classList.remove('selected');
+  });
+  selectedIds.clear();
+}
+
+/* ---- Selection Box ---- */
+let selStart=null;
+canvas.addEventListener('mousedown', e=>{
+  if (e.target===canvas && e.button===0 && !ctrlDown){
+    clearSelection();
+    const rect=canvas.getBoundingClientRect();
+    selStart={x:e.clientX-rect.left, y:e.clientY-rect.top};
+    selectionBox.style.left=selStart.x+'px';
+    selectionBox.style.top=selStart.y+'px';
+    selectionBox.style.width='0px';
+    selectionBox.style.height='0px';
+    selectionBox.style.display='block';
+    function onMove(ev){
+      const x=ev.clientX-rect.left, y=ev.clientY-rect.top;
+      const minX=Math.min(x,selStart.x), minY=Math.min(y,selStart.y);
+      const w=Math.abs(x-selStart.x), h=Math.abs(y-selStart.y);
+      selectionBox.style.left=minX+'px';
+      selectionBox.style.top=minY+'px';
+      selectionBox.style.width=w+'px';
+      selectionBox.style.height=h+'px';
+      const box={x:minX,y:minY,w,h};
+      clearSelection();
+      Object.values(elements).forEach(elRec=>{
+        const ex=parseFloat(elRec.el.style.left);
+        const ey=parseFloat(elRec.el.style.top);
+        const ew=elRec.el.offsetWidth;
+        const eh=elRec.el.offsetHeight;
+        if (ex+ew>box.x && ex<box.x+box.w && ey+eh>box.y && ey<box.y+box.h)
+          selectElement(elRec.id);
+      });
+    }
+    function onUp(){
+      selectionBox.style.display='none';
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+    }
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+  }
+});
+
+/* ---- Copy/Paste ---- */
+document.addEventListener('keydown', e=>{
+  if (e.ctrlKey && e.key.toLowerCase()==='c'){
+    if (selectedIds.size>0){
+      copiedData = {
+        elements:Array.from(selectedIds).map(id=>{
+          const elRec=elements[id];
+          return {type:elRec.type,x:parseFloat(elRec.el.style.left),y:parseFloat(elRec.el.style.top),state:elRec.el.dataset.state||null};
+        })
+      };
+    }
+  }
+  if (e.ctrlKey && e.key.toLowerCase()==='v') {
+    e.preventDefault();
+    if (copiedData) {
+      const offset = 20;
+      const newIds = [];
+      clearSelection();
+      copiedData.elements.forEach(e => {
+        const newId = 'el' + (idCounter++);
+        addElement(e.type, e.x + offset, e.y + offset, newId, e.state);
+        newIds.push(newId);
+      });
+      newIds.forEach(id => selectElement(id));
+      updateWires();
+      simulate();
+    }
+  }
+});
+
+/* ---- Remove ---- */
+function removeElement(id){
+  for (let i=connections.length-1;i>=0;i--){
+    if (connections[i].from.id===id||connections[i].to.id===id) connections.splice(i,1);
+  }
+  const e=elements[id];
+  if (!e) return;
+  e.el.remove();
+  delete elements[id];
+  selectedIds.delete(id);
+  updateWires();
+  simulate();
+}
+
+/* ---- Wiring ---- */
+function portMouseDown(e){
+  const portEl=e.currentTarget, elId=portEl.dataset.el, portName=portEl.dataset.port, role=portEl.dataset.role;
+  if (e.button===2 || (e.button===0 && ctrlDown)){
+    e.preventDefault();
+    wiring={from:{id:elId,port:portName,role},mouse:{x:e.clientX,y:e.clientY},nearest:null};
+    document.addEventListener('mousemove',onWireMove);
+    document.addEventListener('mouseup',onWireUp);
+    updateWires(e.clientX,e.clientY);
+  }
+}
+function nodeMouseDown(e){
+  if (e.button===2){
+    e.preventDefault();
+    const el=e.currentTarget;
+    const ports=Array.from(el.querySelectorAll('.port')).filter(p=>p.dataset.role==='out');
+    if (!ports.length) return;
+    const mouse={x:e.clientX,y:e.clientY};
+    let nearest=ports[0], dmin=Infinity;
+    ports.forEach(p=>{
+      const r=p.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const d=(cx-mouse.x)**2+(cy-mouse.y)**2;
+      if (d<dmin){dmin=d;nearest=p;}
+    });
+    wiring={from:{id:nearest.dataset.el,port:nearest.dataset.port,role:nearest.dataset.role},mouse:{x:e.clientX,y:e.clientY},nearest:null};
+    document.addEventListener('mousemove',onWireMove);
+    document.addEventListener('mouseup',onWireUp);
+    updateWires(e.clientX,e.clientY);
+  }
+}
+function onWireMove(e){
+  wiring.mouse.x=e.clientX; wiring.mouse.y=e.clientY;
+  const threshold=28; let nearest=null,dmin=threshold*threshold+1;
+  Object.values(elements).forEach(elRec=>{
+    const portEls=elRec.el.querySelectorAll('.port');
+    portEls.forEach(p=>{
+      if (p.dataset.el===wiring.from.id && p.dataset.port===wiring.from.port) return;
+      const r=p.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height/2;
+      const d=(cx-e.clientX)**2+(cy-e.clientY)**2;
+      if (d<dmin){dmin=d;nearest=p;}
+    });
+  });
+  document.querySelectorAll('.port.hover').forEach(p=>p.classList.remove('hover'));
+  if (nearest){
+    nearest.classList.add('hover');
+    wiring.nearest={id:nearest.dataset.el,port:nearest.dataset.port,role:nearest.dataset.role,el:nearest};
+  } else wiring.nearest=null;
+  updateWires(e.clientX,e.clientY);
+}
+function onWireUp(e){
+  document.removeEventListener('mousemove',onWireMove);
+  document.removeEventListener('mouseup',onWireUp);
+  if (wiring && wiring.nearest){
+    connections.push({from:{...wiring.from},to:{id:wiring.nearest.id,port:wiring.nearest.port,role:wiring.nearest.role}});
+  }
+  document.querySelectorAll('.port.hover').forEach(p=>p.classList.remove('hover'));
+  wiring=null;
+  updateWires(); simulate();
+}
+
+/* ---- Draw Wires ---- */
+function getPortCenter(elId, portName, role){
+  const elRec=elements[elId];
+  if (!elRec) return null;
+  const portEls=Array.from(elRec.el.querySelectorAll('.port')).filter(p=>p.dataset.port===portName);
+  const chosen=portEls.find(p=>p.dataset.role===role)||portEls[0];
+  if (!chosen) return null;
+  const r=chosen.getBoundingClientRect(), cRect=canvas.getBoundingClientRect();
+  return {x:r.left+r.width/2-cRect.left, y:r.top+r.height/2-cRect.top};
+}
+function updateWires(mouseX, mouseY) {
+  svg.innerHTML = '';
+
+  // Draw all existing connections
+  connections.forEach(c => {
+    const p1 = getPortCenter(c.from.id, c.from.port, c.from.role);
+    const p2 = getPortCenter(c.to.id, c.to.port, c.to.role);
+    if (!p1 || !p2) return;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x);
+    line.setAttribute('y1', p1.y);  // ✅ fixed line
+    line.setAttribute('x2', p2.x);
+    line.setAttribute('y2', p2.y);
+    line.setAttribute('stroke', '#c0392b');
+    line.setAttribute('stroke-width', '4');
+    line.setAttribute('stroke-linecap', 'round');
+    svg.appendChild(line);
+  });
+
+  // Draw temporary wire while dragging
+  if (wiring) {
+    const fromP = getPortCenter(wiring.from.id, wiring.from.port, wiring.from.role);
+    const rect = canvas.getBoundingClientRect();
+    const mx = (mouseX || wiring.mouse.x) - rect.left;
+    const my = (mouseY || wiring.mouse.y) - rect.top;
+    if (fromP) {
+      const tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tempLine.setAttribute('x1', fromP.x);
+      tempLine.setAttribute('y1', fromP.y);
+      tempLine.setAttribute('x2', mx);
+      tempLine.setAttribute('y2', my);
+      tempLine.setAttribute('stroke', '#c0392b');
+      tempLine.setAttribute('stroke-width', '4');
+      tempLine.setAttribute('stroke-linecap', 'round');
+      tempLine.setAttribute('stroke-dasharray', '6,4');
+      svg.appendChild(tempLine);
+    }
+  }
+}
+
+
+/* ---- Simulation ---- */
+function simulate(){
+  const values={};
+  Object.values(elements).forEach(e=>{
+    if (e.type==='SWITCH'){
+      const v=e.el.dataset.state==='1';
+      values[e.id]=v; values[e.id+'-out']=v;
+    }
+  });
+  let changed=true;
+  while(changed){
+    changed=false;
+    Object.values(elements).forEach(e=>{
+      const type=e.type;
+      if (type==='AND'||type==='OR'||type==='NOT'||type==='RELAY'){
+        if (type==='RELAY'){
+          let topIn=false,bottomIn=false;
+          connections.forEach(c=>{
+            if (c.to.id===e.id){
+              const val=values[c.from.id+'-'+c.from.port] ?? values[c.from.id] ?? false;
+              if (c.to.port==='top') topIn=topIn||val;
+              if (c.to.port==='bottom') bottomIn=bottomIn||val;
+            }
+          });
+          let topOut=false,bottomOut=false;
+          if (bottomIn&&!topIn) topOut=true;
+          if (bottomIn&&topIn) bottomOut=true;
+          values[e.id+'-top']=topOut; values[e.id+'-bottom']=bottomOut;
+          e.el.classList.toggle('on',topOut||bottomOut);
+          return;
+        }
+        const ins=connections.filter(c=>c.to.id===e.id).map(c=>{
+          const v=values[c.from.id+'-'+c.from.port] ?? values[c.from.id] ?? false;
+          return v;
+        });
+        if (!ins.length&&type!=='NOT') return;
+        let newVal=false;
+        if (type==='AND') newVal=ins.every(v=>v);
+        if (type==='OR') newVal=ins.some(v=>v);
+        if (type==='NOT') newVal=!ins[0];
+        if (values[e.id]!==newVal){values[e.id]=newVal;values[e.id+'-out']=newVal;changed=true;}
+      }
+    });
+  }
+  Object.values(elements).forEach(e=>{
+    if (e.type==='OUTPUT'){
+      const ins=connections.filter(c=>c.to.id===e.id).map(c=>{
+        return values[c.from.id+'-'+c.from.port] ?? values[c.from.id] ?? false;
+      });
+      const val=ins.some(v=>v);
+      e.el.classList.toggle('on',val);
+    }
+    if (['AND','OR','NOT'].includes(e.type)){
+      e.el.classList.toggle('on',!!values[e.id]);
+    }
+  });
+  updateWires();
+}
+
+/* ---- Export / Import ---- */
+document.getElementById('exportBtn').onclick = ()=>{
+  const data={
+    elements:Object.values(elements).map(e=>({
+      id:e.id, type:e.type, 
+      x:parseFloat(e.el.style.left),
+      y:parseFloat(e.el.style.top),
+      state:e.el.dataset.state||null
+    })),
+    connections:connections
+  };
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='logic_circuit.json';
+  document.body.appendChild(a);
+  a.click(); a.remove(); URL.revokeObjectURL(url);
+};
+
+document.getElementById('importBtn').onclick = ()=> document.getElementById('importFile').click();
+
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file=e.target.files[0];
+  if (!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      Object.keys(elements).forEach(id=>removeElement(id));
+      connections.length=0;
+      svg.innerHTML='';
+      if (data.elements) data.elements.forEach(el=> addElement(el.type,el.x,el.y,el.id,el.state));
+      if (data.connections) data.connections.forEach(c=>connections.push(c));
+      updateWires(); simulate();
+    }catch(err){alert('Invalid file');}
+  };
+  reader.readAsText(file);
+});
+</script>
+</body>
+</html>
