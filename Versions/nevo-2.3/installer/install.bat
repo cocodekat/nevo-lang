@@ -34,17 +34,17 @@ C:\nevo\tcc\tcc\tcc.exe nevo.c -o C:\nevo\nevo.exe
 C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c -o C:\nevo\Modes\n.exe
 
 REM Move header files into C:\nevo\libraries\
-move /y arradd.h C:\nevo\Libraries\ >nul 2>&1
-move /y h1.h C:\nevo\Libraries\ >nul 2>&1
-move /y sha256.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\arradd.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\h1.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\sha256.h C:\nevo\Libraries\ >nul 2>&1
 
-move /y better_ops.h C:\nevo\Libraries\ >nul 2>&1
-move /y bool.h C:\nevo\Libraries\ >nul 2>&1
-move /y unless.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\better_ops.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\bool.h C:\nevo\Libraries\ >nul 2>&1
+move /y Libraries\unless.h C:\nevo\Libraries\ >nul 2>&1
 
-move /y npxm.h C:\nevo\Libraries\Images\ >nul 2>&1
-move /y stb_image_write.h C:\nevo\Libraries\Images\ >nul 2>&1
-move /y stb_image.h C:\nevo\Libraries\Images\ >nul 2>&1
+move /y Libraries\Images\npxm.h C:\nevo\Libraries\Images\ >nul 2>&1
+move /y Libraries\Images\stb_image_write.h C:\nevo\Libraries\Images\>nul 2>&1
+move /y Libraries\Images\stb_image.h C:\nevo\Libraries\Images\ >nul 2>&1
 
 echo done! Everything you need is inside of C:\nevo Compile files using C:\nevo\nevo -flag input_file"
 pause
