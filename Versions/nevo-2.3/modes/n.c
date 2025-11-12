@@ -157,14 +157,14 @@ int main(int argc, char *argv[]) {
         // Include headers
         if (needed.stdio) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\stdio.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\stdio.h\"\n");
             #else
                 fprintf(out, "#include <stdio.h>\n");
             #endif
         }
         if (needed.stdlib) {
         #if defined (_WIN32) || defined(_WIN64)
-            fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\stdlib.h\"\n");
+            fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\stdlib.h\"\n");
         #else
             fprintf(out, "#include <stdlib.h>\n");
         #endif
@@ -172,7 +172,7 @@ int main(int argc, char *argv[]) {
 
         if (needed.string) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\string.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\string.h\"\n");
             #else
                 fprintf(out, "#include <string.h>\n");
             #endif
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 
         if (needed.math) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\math.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\math.h\"\n");
             #else
                 fprintf(out, "#include <math.h>\n");
             #endif
@@ -188,7 +188,7 @@ int main(int argc, char *argv[]) {
 
         if (needed.ctype) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\ctype.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\ctype.h\"\n");
             #else
                 fprintf(out, "#include <ctype.h>\n");
             #endif
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
 
         if (needed.time) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\time.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\time.h\"\n");
             #else
                 fprintf(out, "#include <time.h>\n");
             #endif
@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
 
         if (needed.assert) {
             #if defined (_WIN32) || defined(_WIN64)
-                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\assert.h\"\n");
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\include\\assert.h\"\n");
             #else
                 fprintf(out, "#include <assert.h>\n");
             #endif
