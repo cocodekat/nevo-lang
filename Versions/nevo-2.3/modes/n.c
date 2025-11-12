@@ -290,8 +290,15 @@ int main(int argc, char *argv[]) {
             char exe_output[512];
             snprintf(exe_output, sizeof(exe_output), "%s", output_file);
 
+            // Remove .c extension if present
+            size_t len = strlen(exe_output);
+            if (len > 2 && strcmp(exe_output + len - 2, ".c") == 0) {
+                exe_output[len - 2] = '\0'; // truncate ".c"
+            }
+
             // Add .exe if not already present
-            if (strlen(exe_output) < 4 || strcmp(exe_output + strlen(exe_output) - 4, ".exe") != 0) {
+            len = strlen(exe_output);
+            if (len < 4 || strcmp(exe_output + len - 4, ".exe") != 0) {
                 strcat(exe_output, ".exe");
             }
 
@@ -299,8 +306,6 @@ int main(int argc, char *argv[]) {
             snprintf(cmd, sizeof(cmd),
                 "\"\"%s\" \"%s\" -o \"%s\"\"",
                 compiler, c_file, exe_output);
-
-
 
         #else
             dot = strrchr(output_file, '.');
