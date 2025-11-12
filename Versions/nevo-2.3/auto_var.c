@@ -87,6 +87,17 @@ const char *infer_type(const char *rhs) {
     if (strstr(buf, "sometimes")) return "bool";
     if (strstr(buf, "can you repeat the question")) return "bool";
 
+    if (strstr(buf, "true")) return "bool";
+    if (strstr(buf, "false")) return "bool";
+    if (strstr(buf, "yes")) return "bool";
+    if (strstr(buf, "no")) return "bool";
+
+    if (strstr(buf, "unknown")) return "bool";
+    if (strstr(buf, "definitely")) return "bool";
+    if (strstr(buf, "possibly")) return "bool";
+    if (strstr(buf, "impossible")) return "bool";
+    if (strstr(buf, "because")) return "bool";
+
     return "float";
 }
 

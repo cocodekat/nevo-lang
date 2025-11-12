@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 
+#ifdef __STDBOOL_H__
+#endif
+
 // --- Custom "bool" type ---
 typedef enum {
     TYPE_FALSE = 0,

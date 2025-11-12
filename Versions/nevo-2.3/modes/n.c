@@ -320,10 +320,6 @@ int main(int argc, char *argv[]) {
                 printf("Error (line %d): Missing file or bad include path.\n", orig_line);
                 has_error = 1;
             }
-            else if (strstr(buf, "#define") || strstr(buf, "#include")) {
-                // Optionally show preprocessor issues
-                printf("Warning (line %d): %s", orig_line, buf);
-            }
             if (ban_error() == 1) {
                 has_error = 1;
             }
