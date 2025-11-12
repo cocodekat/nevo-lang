@@ -3,7 +3,7 @@
 set TARGET_DIR=C:\nevo
 
 set "ZIP_PATH=%TARGET_DIR%\tcc.zip"
-mkdir C:\nevo\libraries\Images
+mkdir C:\nevo\Libraries\Images
 mkdir C:\nevo\Modes
 
 set URL=https://download.savannah.gnu.org/releases/tinycc/tcc-0.9.26-win64-bin.zip
@@ -34,17 +34,17 @@ C:\nevo\tcc\tcc\tcc.exe nevo.c -o C:\nevo\nevo.exe
 C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c -o C:\nevo\Modes\n.exe
 
 REM Move header files into C:\nevo\libraries\
-move /y arradd.h C:\nevo\libraries\ >nul 2>&1
-move /y h1.h C:\nevo\libraries\ >nul 2>&1
-move /y sha256.h C:\nevo\libraries\ >nul 2>&1
+move /y arradd.h C:\nevo\Libraries\ >nul 2>&1
+move /y h1.h C:\nevo\Libraries\ >nul 2>&1
+move /y sha256.h C:\nevo\Libraries\ >nul 2>&1
 
-move /y better_ops.h C:\nevo\libraries\ >nul 2>&1
-move /y bool.h C:\nevo\libraries\ >nul 2>&1
-move /y unless.h C:\nevo\libraries\ >nul 2>&1
+move /y better_ops.h C:\nevo\Libraries\ >nul 2>&1
+move /y bool.h C:\nevo\Libraries\ >nul 2>&1
+move /y unless.h C:\nevo\Libraries\ >nul 2>&1
 
-move /y npxm.h C:\nevo\libraries\ >nul 2>&1
-move /y stb_image_write.h C:\nevo\libraries\ >nul 2>&1
-move /y stb_image.h C:\nevo\libraries\ >nul 2>&1
+move /y npxm.h C:\nevo\Libraries\Images\ >nul 2>&1
+move /y stb_image_write.h C:\nevo\Libraries\Images\ >nul 2>&1
+move /y stb_image.h C:\nevo\Libraries\Images\ >nul 2>&1
 
 echo done! Everything you need is inside of C:\nevo Compile files using C:\nevo\nevo -flag input_file"
 pause
