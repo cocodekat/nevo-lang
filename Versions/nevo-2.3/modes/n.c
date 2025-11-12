@@ -122,8 +122,7 @@ int main(int argc, char *argv[]) {
         strncpy(output_file, input_file, sizeof(output_file));
         output_file[sizeof(output_file) - 1] = '\0';
         char *dot = strrchr(output_file, '.');
-        if (dot) strcpy(dot, ".c");
-        else strcat(output_file, ".c");
+        if (dot) *dot = '\0';
         char c_file[] = "A1bC2dE35F31nBv53X.c";
 
         // Read + preprocess
