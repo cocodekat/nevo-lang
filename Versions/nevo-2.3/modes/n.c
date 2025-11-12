@@ -279,7 +279,7 @@ int main(int argc, char *argv[]) {
 
         // Compile
         #if defined(_WIN32) || defined(_WIN64)
-            const char *compiler = "C:\\nevo\\tcc\\tcc\\tcc.exe";
+            const char *compiler = "C:\\\\nevo\\\\tcc\\\\tcc\\\\tcc.exe";
         #else
             const char *compiler = "clang";
         #endif
