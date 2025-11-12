@@ -287,18 +287,19 @@ int main(int argc, char *argv[]) {
         char cmd[512];
 
         #if defined(_WIN32) || defined(_WIN64)
-            char exe_output[256];
-            strncpy(exe_output, output_file, sizeof(exe_output));
-            exe_output[sizeof(exe_output)-1] = 0;
+            char exe_output[512];
+            snprintf(exe_output, sizeof(exe_output), "%s", output_file);
 
-            dot = strrchr(exe_output, '.');
-            if (dot) strcpy(dot, ".exe");
-            else strcat(exe_output, ".exe");
+            // Add .exe if not already present
+            if (strlen(exe_output) < 4 || strcmp(exe_output + strlen(exe_output) - 4, ".exe") != 0) {
+                strcat(exe_output, ".exe");
+            }
 
-            // Wrap in quotes in case of spaces
+            // Build command
             snprintf(cmd, sizeof(cmd),
                 "\"%s\" -Wall -std=c99 \"%s\" -o \"%s\" 2>&1",
                 compiler, c_file, exe_output);
+
 
         #else
             dot = strrchr(output_file, '.');
