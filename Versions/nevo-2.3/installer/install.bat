@@ -23,7 +23,7 @@ del "%ZIP_PATH%"
 REM Make sure the working directory is the folder where this script is
 cd /d "%~dp0"
 
-REM Go one directory up from script location (installer\ -> nevo-2\)
+REM Go one directory up from script location (installer\ -> necd ..vo-2\)
 cd ..
 
 REM Optional: Show current path
