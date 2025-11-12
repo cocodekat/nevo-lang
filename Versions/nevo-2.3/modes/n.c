@@ -212,6 +212,14 @@ int main(int argc, char *argv[]) {
         #endif
         }
 
+        if (needed.unless_defined) {
+        #if defined(_WIN32) || defined(_WIN64)
+            fprintf(out, "#include \"C:\\nevo\\libraries\\unless.h\"\n");
+        #else
+            fprintf(out, "#include \"%s/nevo/libraries/unless.h\"\n", getenv("HOME"));
+        #endif
+        }
+
         int needs_type = 0;
 
         for (int i = 0; i < num_lines; i++) {
