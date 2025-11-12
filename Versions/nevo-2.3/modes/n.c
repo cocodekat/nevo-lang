@@ -155,13 +155,61 @@ int main(int argc, char *argv[]) {
         calculate_needed_headers((const char **)lines, num_lines, &needed);
 
         // Include headers
-        if (needed.stdio) fprintf(out, "#include <stdio.h>\n");
-        if (needed.stdlib) fprintf(out, "#include <stdlib.h>\n");
-        if (needed.string) fprintf(out, "#include <string.h>\n");
-        if (needed.math) fprintf(out, "#include <math.h>\n");
-        if (needed.ctype) fprintf(out, "#include <ctype.h>\n");
-        if (needed.time) fprintf(out, "#include <time.h>\n");
-        if (needed.assert) fprintf(out, "#include <assert.h>\n");
+        if (needed.stdio) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\stdio.h\"\n");
+            #else
+                fprintf(out, "#include <stdio.h>\n");
+            #endif
+        }
+        if (needed.stdlib) {
+        #if defined (_WIN32) || defined(_WIN64)
+            fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\stdlib.h\"\n");
+        #else
+            fprintf(out, "#include <stdlib.h>\n");
+        #endif
+        }
+
+        if (needed.string) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\string.h\"\n");
+            #else
+                fprintf(out, "#include <string.h>\n");
+            #endif
+        }
+
+        if (needed.math) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\math.h\"\n");
+            #else
+                fprintf(out, "#include <math.h>\n");
+            #endif
+        }
+
+        if (needed.ctype) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\ctype.h\"\n");
+            #else
+                fprintf(out, "#include <ctype.h>\n");
+            #endif
+        }
+
+        if (needed.time) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\time.h\"\n");
+            #else
+                fprintf(out, "#include <time.h>\n");
+            #endif
+        }
+
+        if (needed.assert) {
+            #if defined (_WIN32) || defined(_WIN64)
+                fprintf(out, "#include \"C:\\nevo\\tcc\\tcc\\includes\\assert.h\"\n");
+            #else
+                fprintf(out, "#include <assert.h>\n");
+            #endif
+        }
+
 
         if (needed.arradd) {
         #if defined(_WIN32) || defined(_WIN64)
