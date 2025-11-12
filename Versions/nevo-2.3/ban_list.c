@@ -17,7 +17,7 @@ const char* white_list[] = {
     "unsigned ", "void ",
     "int8_t", "int16_t", "int32_t", "int64_t", "int128_t",
     "uint8_t", "uint16_t", "uint32_t", "uint64_t", "uint128_t",
-    "nocap", "cap",
+    "nocap", "cap", "#be",
     "#define", "typedef"
 };
 const int white_count = sizeof(white_list)/sizeof(white_list[0]);

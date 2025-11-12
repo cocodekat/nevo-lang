@@ -20,6 +20,7 @@ typedef struct {
     bool cap_defined;
     bool nocap_defined;
     bool bool_defined;
+    bool bops_defined;
 } headers_needed_t;
 
 static void calculate_needed_headers(const char *code_lines[], int num_lines, headers_needed_t *out) {
@@ -38,6 +39,7 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     out->cap_defined = false;
     out->nocap_defined = false;
     out->bool_defined = false;
+    out->bops_defined = false;
 
     const char *stdio_funcs[] = {"printf","scanf","fprintf","fscanf","sprintf","sscanf","snprintf","putchar","getchar","puts","gets","fgets","fputs"};
     const char *stdlib_funcs[] = {"malloc","calloc","realloc","free","atoi","atol","atoll","strtol","strtoll","strtoul","strtoull","strtod","strtof","strtold","exit","abort","system","rand","srand","qsort","bsearch"};
@@ -55,8 +57,9 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     const char* cap_define[] = {"cap"};
     const char* nocap_define[] = {"nocap"};
 
-    const char* bool_define[] = {"maybe", "sometimes", "can you repeat the question"};
+    const char* bool_define[] = {"maybe", "sometimes", "can you repeat the question", "possibly", "because", "true", "false", "unknown", "definitely", "impossible", "yes", "no"};
 
+    const char* bops_define[] = {"AND", "XOR", "NOT", "OR", "NAND", "NOR", "XNOR", "IMPLIES", "NIMPLIES", "CONVERSE_IMPLIES", "BICONDITIONAL", "NOT_BICONDITIONAL", "BUFFER", "INVERT"};
 
     for (int i = 0; i < num_lines; i++) {
         const char *line = code_lines[i];
@@ -107,6 +110,9 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
 
         for (int j = 0; j < sizeof(bool_define)/sizeof(bool_define[0]); j++)
             if (strstr(line, bool_define[j])) out->bool_defined = true;
+
+        for (int j = 0; j < sizeof(bops_define)/sizeof(bops_define[0]); j++)
+            if (strstr(line, bops_define[j])) out->bops_defined = true;
 
 
     }
