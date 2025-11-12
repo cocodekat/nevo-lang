@@ -38,6 +38,10 @@ move /y arradd.h C:\nevo\libraries\ >nul 2>&1
 move /y h1.h C:\nevo\libraries\ >nul 2>&1
 move /y sha256.h C:\nevo\libraries\ >nul 2>&1
 
+move /y better_ops.h C:\nevo\libraries\ >nul 2>&1
+move /y bool.h C:\nevo\libraries\ >nul 2>&1
+move /y unless.h C:\nevo\libraries\ >nul 2>&1
+
 move /y npxm.h C:\nevo\libraries\ >nul 2>&1
 move /y stb_image_write.h C:\nevo\libraries\ >nul 2>&1
 move /y stb_image.h C:\nevo\libraries\ >nul 2>&1
