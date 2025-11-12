@@ -297,8 +297,9 @@ int main(int argc, char *argv[]) {
 
             // Build command
             snprintf(cmd, sizeof(cmd),
-                "\"%s\" -Wall -std=c99 \"%s\" -o \"%s\"",
+                "\"\"%s\" \"%s\" -o \"%s\"\"",
                 compiler, c_file, exe_output);
+
 
 
         #else
