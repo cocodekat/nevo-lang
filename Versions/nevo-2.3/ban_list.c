@@ -6,7 +6,7 @@ int error = 0;
 // Whitelist
 const char* white_list[] = {
     "arradd(", "carr(", "farr(", "parr(", "get(", "gets(",
-    "rand", "srand(", "sha256(", "sha256_bin(", "h1(", "h1_bin(", "kaboom(", "pbin(",
+    "rand", "srand(", "sha256(", "sha256_bin(", "h1(", "h1_bin(", "kaboom(", "pbin(", "unless(",
     "print(", "exit(", "stop(", "yap(", "fart(",
     "fread(", "freadf(", "fwritef(", "fopen(", "fclose(",
     "image(", "compile(", "depile(",
