@@ -7,7 +7,6 @@
 #include "../auto_var.h"
 #include "../ban_list.h"
 #include "../replacements.h"
-#include "../curses.h"
 
 const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 
@@ -136,7 +135,6 @@ int main(int argc, char *argv[]) {
             char tmp[1024];
             strncpy(tmp, line, sizeof(tmp));
             tmp[sizeof(tmp) - 1] = 0;
-            censor_line(tmp);
             check_variable(tmp);
             register_functions_in_line(tmp);
             check_function_calls_in_line(tmp);

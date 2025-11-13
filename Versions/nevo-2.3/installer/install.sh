@@ -15,7 +15,7 @@ ls ../modes/n.c ../auto_var.c ../ban_list.c
 # ── Compiling the compiler
 echo "Compiling Nevo Compiler..."
 clang "../nevo.c" -o "$TARGET_DIR/nevo"
-clang "../modes/n.c" "../auto_var.c" "../ban_list.c" "../curses.c" -o "$TARGET_DIR/Modes/n"
+clang "../modes/n.c" "../auto_var.c" "../ban_list.c" -o "$TARGET_DIR/Modes/n"
 
 # ── Moving the needed .h files
 echo "Enabling Builtin Functions..."
