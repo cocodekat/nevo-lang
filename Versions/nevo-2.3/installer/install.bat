@@ -31,7 +31,7 @@ echo Current directory: %CD%
 
 REM Compile C files from current dir (nevo-2\)
 C:\nevo\tcc\tcc\tcc.exe nevo.c -o C:\nevo\nevo.exe
-C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c -o C:\nevo\Modes\n.exe
+C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c curses.c -o C:\nevo\Modes\n.exe
 
 REM Move header files into C:\nevo\libraries\
 move /y Libraries\arradd.h C:\nevo\Libraries\ >nul 2>&1
