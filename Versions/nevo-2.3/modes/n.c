@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
 
             // Build command
             snprintf(cmd, sizeof(cmd),
-                "\"\"%s\" \"%s\" -o \"%s\"\"",
+                "\"\"%s\" \"%s\" -o \"%s\"\" 2>&1",
                 compiler, c_file, exe_output);
 
         #else
