@@ -239,7 +239,6 @@ int main(int argc, char *argv[]) {
         #endif
         }
 
-        if (needed.be_defined) fprintf(out, "#define be =\n");
         if (needed.cap_defined) fprintf(out, "#define cap false\n");
         if (needed.nocap_defined) fprintf(out, "#define nocap true\n");
 

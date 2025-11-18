@@ -55,7 +55,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     const char* sha256_funcs[] = {"sha256"};
     const char* npxm_funcs[] = {"image"};
 
-    const char* be_define[] = {"be"};
     const char* cap_define[] = {"cap"};
     const char* nocap_define[] = {"nocap"};
 
@@ -102,9 +101,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
             if (strstr(line, npxm_funcs[j])) out->npxm = true;
         
         // #----Defines
-
-        for (int j = 0; j < sizeof(be_define)/sizeof(be_define[0]); j++)
-            if (strstr(line, be_define[j])) out->be_defined = true;
 
         for (int j = 0; j < sizeof(nocap_define)/sizeof(nocap_define[0]); j++)
             if (strstr(line, nocap_define[j])) out->nocap_defined = true;

@@ -17,7 +17,6 @@ replacement_t replacements[] = {
     { "kaboom()", "exit(0)" },
     { "fart(", "printf("},
     { "yap(", "printf("},
-    { "#be", "#define"},
     //------------------FILES----------------------------
     { "fread(", "fgets(" },
     { "fwritef(", "fprintf(" },
