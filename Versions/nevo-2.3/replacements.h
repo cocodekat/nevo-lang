@@ -9,18 +9,21 @@ typedef struct {
 replacement_t replacements[] = {
     { "print(", "printf(" },
     { "get(", "scanf(" },
-    { "stop()", "exit(0)"},
-    { "exit()", "exit(0)"},
-    { "gets(", "fgets("},
-    { "!", ";"},
-    //------------------FUNNY ADDITIONS------------------
+    { "stop()", "exit(0)" },
+    { "exit()", "exit(0)" },
+    { "gets(", "fgets(" },
+    { "!", ";" },
+
     { "kaboom()", "exit(0)" },
-    { "fart(", "printf("},
-    { "yap(", "printf("},
-    //------------------FILES----------------------------
+    { "fart(", "printf(" },
+    { "yap(", "printf(" },
+
     { "fread(", "fgets(" },
     { "fwritef(", "fprintf(" },
     { "freadf(", "fscanf(" },
+
+    // NULL TERMINATOR — REQUIRED
+    { NULL, NULL }
 };
 
 
