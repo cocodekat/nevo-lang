@@ -12,7 +12,7 @@ const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 
 void apply_replacements(char *line) {
     char buffer[1024];
-    for (int r = 0; r < replacements_count; r++) {
+    for (int r = 0; replacements[r].from != NULL; r++) {
         char *src = line;
         char *dst = buffer;
         buffer[0] = '\0';
@@ -26,7 +26,7 @@ void apply_replacements(char *line) {
 
                 strcpy(dst, replacements[r].to);
                 dst += strlen(replacements[r].to);
-
+                
                 src = pos + strlen(replacements[r].from);
             } else {
                 strcpy(dst, src);
