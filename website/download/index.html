@@ -75,34 +75,34 @@
             <div id="iysn3j" class="release-summary-top">
               <div id="id40jf" class="release-summary-text">
                 <span data-i18n="badge_stable" id="i2v9nq" class="release-badge">Stable</span>
-                <h2 id="i6zgtb" class="gjs-t-h2 release-version">v1.0.0</h2>
+                <h2 id="i6zgtb" class="gjs-t-h2 release-version">v2.3</h2>
               </div>
               <div id="ijm673" class="release-meta">
-                <span data-i18n="release_date" id="ibs0ii">Released on 2025-10-10</span>
+                <span data-i18n="release_date" id="ibs0ii">Released on 2025-11-18</span>
                 <span data-i18n="release_channel" id="iom9es">Channel: Stable</span>
               </div>
             </div>
-            <p data-i18n="release_note" id="i27859" class="release-note">Includes base compiler for windows and mac.</p>
+            <p data-i18n="release_note" id="i27859" class="release-note">Includes base compiler for windows and mac. For more info about this version check out the discord server at https://discord.gg/FxKhrdx5TU</p>
           </div><!-- OS Download Cards -->
           <div id="ie3k9i" class="download-grid">
             <article id="i2bjn9" class="gjs-t-border os-card-windows">
               <div id="ir0j2s" class="os-header">
                 <div id="iaehpc" class="os-title-group">
                   <img src="https://api.iconify.design/lucide-monitor.svg?color=%23e6e9ef" width="22" height="22" loading="lazy" id="igbqfb" />
-                  <h3 data-i18n="os_cross" id="invjfr" class="os-title">Cross-OS</h3>
+                  <h3 data-i18n="os_cross" id="invjfr" class="os-title">Windows</h3>
                 </div>
-                <span id="i5lvtb" class="os-version-badge">v1.0.0</span>
+                <span id="i5lvtb" class="os-version-badge">v2.3</span>
               </div>
-              <p data-i18n="os_desc" id="i05q5u" class="os-description">x64 and ARM64 installers. Supports Windows 10/11 and most versions of MacOS.</p>
+              <p data-i18n="os_desc" id="i05q5u" class="os-description">x64 installer. Supports Windows 10/11.</p>
               <div id="itly4l" class="os-actions">
                 <a href="#crossos" id="im4tnp" class="gjs-t-button primary-download-macos">
                   <img src="https://api.iconify.design/lucide-download.svg?color=%23ffffff" width="18" height="18" loading="lazy" id="i9t0id" />
-                  <span data-i18n="download_installer" id="itzgii">Download Installer (.sh .bat)</span>
+                  <span data-i18n="download_installer" id="itzgii">Download Installer (.bat)</span>
                 </a>
               </div>
               <ul id="icwypi" class="os-notes-windows">
-                <li data-i18n="note1" id="i3ycml">Includes Nevo, mingw64, and python3-moveable.</li>
-                <li data-i18n="note2" id="ih2vku">Requires absolutely nothing.</li>
+                <li data-i18n="note1" id="i3ycml">Includes Nevo and TCC both required for compiling</li>
+                <li data-i18n="note2" id="ih2vku">Requires absolutely nothing from the user.</li>
               </ul>
             </article>
           </div><!-- Installation Instructions -->
@@ -115,9 +115,8 @@
               </summary>
               <ol id="ico82g" class="setup-instruction">
                 <li data-i18n="win_step1" id="ix1y47">Unzip the installed folder.</li>
-                <li data-i18n="win_step2" id="ip7vzt">Inside of the terminal, open the install folder inside.</li>
-                <li data-i18n="win_step3" id="iicpej">Then run
-                  <pre id="i2vrl5"><code id="ios8rx">.\compile.bat</code></pre>this will install nevo to your computer.
+                <li data-i18n="win_step3" id="iicpej">Then run <code>install.bat</code>
+                  this will install nevo to your computer.
                 </li>
                 <li data-i18n="win_step4" id="iwsp9z">Verify installation:</li>
                 <li id="ikmtmj">
@@ -133,13 +132,12 @@
               </summary>
               <ol id="ih9yqu" class="instructions-list-macos">
                 <li data-i18n="mac_step1" id="i3vu2v">Unzip the installed folder.</li>
-                <li data-i18n="mac_step2" id="ij9xso">Inside of the terminal, open the install folder inside.</li>
-                <li data-i18n="mac_step3" id="ifsdka">Then run
-                  <pre id="i8syhv"><code id="ig7ki6">./compile.sh</code></pre>this will install nevo to your computer.
+                <li data-i18n="mac_step3" id="ifsdka">Then run <code>install.sh</code>
+                  this will install nevo to your computer.
                 </li>
                 <li data-i18n="mac_step4" id="imkwi7">Verify installation:</li>
                 <li id="i57w9i">
-                  <pre id="igsys3"><code id="ieowqu">$HOME/nevo/nevo.exe</code></pre>
+                  <pre id="igsys3"><code id="ieowqu">$HOME/nevo/nevo</code></pre>
                 </li>
                 <li data-i18n="mac_step5" id="in3rpp">This should print something about how to use the program.</li>
               </ol>
