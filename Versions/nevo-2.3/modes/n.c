@@ -343,7 +343,6 @@ int main(int argc, char *argv[]) {
             if (needed.h1) header_lines++;
             if (needed.sha256) header_lines++;
             if (needed.npxm) header_lines++;
-            if (needed.be_defined) header_lines += 3; // be, cap, nocap
             if (needed.bool_defined) header_lines++;
             if (needed.bops_defined) header_lines++;
 

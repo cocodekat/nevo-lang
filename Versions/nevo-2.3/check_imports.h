@@ -16,7 +16,6 @@ typedef struct {
     bool h1;
     bool sha256;
     bool npxm;
-    bool be_defined;
     bool cap_defined;
     bool nocap_defined;
     bool bool_defined;
@@ -36,7 +35,6 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     out->h1 = false;
     out->sha256 = false;
     out->npxm = false;
-    out->be_defined = false;
     out->cap_defined = false;
     out->nocap_defined = false;
     out->bool_defined = false;
