@@ -21,9 +21,6 @@ replacement_t replacements[] = {
     { "fread(", "fgets(" },
     { "fwritef(", "fprintf(" },
     { "freadf(", "fscanf(" },
-
-    // NULL TERMINATOR — REQUIRED
-    { NULL, NULL }
 };
 
 
