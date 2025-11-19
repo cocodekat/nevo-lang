@@ -147,9 +147,8 @@ void check_variable(char *line) {
         }
     }
 
-    // Find assignment '=' or 'be'
+    // Find assignment '='
     int eq_pos = -1;
-    int be_pos = -1;
 
     for (int i = 0; line[i]; i++) {
         if (line[i] == '=') {
@@ -161,19 +160,12 @@ void check_variable(char *line) {
             break;
         }
 
-        if (line[i] == 'b' && line[i+1] == 'e') {
-            be_pos = i;
-            break;
-        }
     }
 
     if (eq_pos != -1) {
         // '=' assignment found
-    } else if (be_pos != -1) {
-        eq_pos = be_pos;
-        line[eq_pos] = '=';
-        memmove(line + eq_pos + 1, line + eq_pos + 2, strlen(line + eq_pos + 2) + 1);
-    } else {
+    }
+     else {
         return;
     }
 

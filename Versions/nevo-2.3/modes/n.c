@@ -12,29 +12,39 @@ const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 
 void apply_replacements(char *line) {
     char buffer[1024];
+
     for (int r = 0; r < replacements_count; r++) {
         char *src = line;
         char *dst = buffer;
-        buffer[0] = '\0';
+        *dst = '\0';
 
         while (*src) {
             char *pos = strstr(src, replacements[r].from);
-            if (pos) {
-                int len = pos - src;
-                memcpy(dst, src, len);
-                dst += len;
-
-                strcpy(dst, replacements[r].to);
-                dst += strlen(replacements[r].to);
-                
-                src = pos + strlen(replacements[r].from);
-            } else {
-                strcpy(dst, src);
+            if (!pos) {
+                strncat(dst, src, sizeof(buffer) - strlen(dst) - 1);
                 break;
             }
+
+            // Copy characters before match
+            int len = pos - src;
+            if (len > (int)(sizeof(buffer) - strlen(dst) - 1))
+                len = sizeof(buffer) - strlen(dst) - 1;
+
+            strncat(dst, src, len);
+
+            // Copy replacement string
+            int repl_len = strlen(replacements[r].to);
+            if (repl_len > (int)(sizeof(buffer) - strlen(dst) - 1))
+                repl_len = sizeof(buffer) - strlen(dst) - 1;
+
+            strncat(dst, replacements[r].to, repl_len);
+
+            src = pos + strlen(replacements[r].from);
         }
 
-        strcpy(line, buffer); // copy back into original line
+        // Copy result back to line
+        strncpy(line, buffer, 1024);
+        line[1023] = '\0';
     }
 }
 
@@ -130,6 +140,10 @@ int main(int argc, char *argv[]) {
         int num_lines = 0;
         char line[1024];
         while (fgets(line, sizeof(line), in)) {
+            if (num_lines >= 1000) {
+                fprintf(stderr, "Too many lines in file, truncating at 1000.\n");
+                break;
+            }
             rtrim(line);
             remove_comments(line);
             char tmp[1024];
@@ -380,7 +394,7 @@ int main(int argc, char *argv[]) {
 
 
         pclose(pipe);
-        // remove(c_file);
+        remove(c_file);
 
         if (!has_error)
             printf("Compilation succeeded: %.*s\n", (int)(dot - output_file), output_file);

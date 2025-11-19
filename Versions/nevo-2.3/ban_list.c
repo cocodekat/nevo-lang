@@ -11,13 +11,13 @@ const char* white_list[] = {
     "fread(", "freadf(", "fwritef(", "fopen(", "fclose(",
     "image(", "compile(", "depile(",
     "case(", "do", "else", "else if", "for", "if", "switch(", "while",
-    "?", ":", "++", "--", "= (", "{ ", "be ",
+    "?", ":", "++", "--", "= (", "{ ",
     "return",
     "int ", "char ", "float ", "double ", "long ", "short ",
     "unsigned ", "void ",
     "int8_t", "int16_t", "int32_t", "int64_t", "int128_t",
     "uint8_t", "uint16_t", "uint32_t", "uint64_t", "uint128_t",
-    "nocap", "cap", "#be",
+    "nocap", "cap",
     "#define", "typedef"
 };
 const int white_count = sizeof(white_list)/sizeof(white_list[0]);
