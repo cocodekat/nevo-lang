@@ -21,6 +21,12 @@ clang "../modes/n.c" "../auto_var.c" "../ban_list.c" -o "$TARGET_DIR/Modes/n"
 echo "Enabling Builtin Functions..."
 mv "../Libraries/" "$TARGET_DIR"
 
+# ── Add nevo executable to PATH if not already there
+if ! grep -Fxq "export PATH=\"$TARGET_DIR:\$PATH\"" "$HOME/.bashrc"; then
+    echo "export PATH=\"$TARGET_DIR:\$PATH\"" >> "$HOME/.bashrc"
+    echo "✅ Added $TARGET_DIR to PATH. Restart your terminal to use 'nevo' anywhere."
+fi
+
 # ── Done!
 echo "✅ Done! Everything You Need Is Inside Of $TARGET_DIR"
 read -p "Press Enter To Continue..."
