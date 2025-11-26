@@ -286,7 +286,7 @@ int main(int argc,char *argv[]) {
         #ifdef _WIN32
             // On Windows, compile using TCC
             snprintf(compile_cmd, sizeof(compile_cmd),
-                    "tcc -run %s -o %s.exe", CFILE, out_name);
+                    "tcc %s -o %s.exe -lole32 -loleaut32 -luuid -lcomctl32 -luser32 -lgdi32", CFILE, out_name);
         #else
             // On macOS, compile using clang++
             snprintf(compile_cmd, sizeof(compile_cmd),
