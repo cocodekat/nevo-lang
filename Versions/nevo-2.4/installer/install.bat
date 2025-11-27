@@ -36,16 +36,5 @@ C:\nevo\tcc\tcc\tcc.exe modes\n.c auto_var.c ban_list.c -o C:\nevo\Modes\n.exe
 REM Move header files into C:\nevo\libraries\
 move /y Libraries C:\nevo >nul 2>&1
 
-REM ── Add C:\nevo to PATH permanently if not already there
-set "REG_KEY=HKCU\Environment"
-for /f "tokens=2*" %%A in ('reg query "%REG_KEY%" /v Path 2^>nul ^| findstr /i "%TARGET_DIR%"') do set "EXISTS=%%B"
-if not defined EXISTS (
-    echo Adding %TARGET_DIR% to PATH...
-    setx PATH "%TARGET_DIR%;%PATH%"
-    echo ✅ Added %TARGET_DIR% to PATH. Restart your terminal or log off/log on for changes to take effect.
-) else (
-    echo %TARGET_DIR% is already in PATH.
-)
-
 echo done! Everything you need is inside of C:\nevo Compile files using nevo.exe -flag input_file"
 pause
