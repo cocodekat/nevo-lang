@@ -58,23 +58,33 @@ void rtrim(char *s) {
 }
 
 void remove_comments(char *line) {
-    if (!line) return;
-    char *c = strstr(line, "//"); if (c) *c = '\0';
-    char *s = strstr(line, "/*");
-    while (s) {
-        char *e = strstr(s + 2, "*/");
-        if (e) {
-            /* remove the block comment by moving tail left */
-            memmove(s, e + 2, strlen(e + 2) + 1);
-        } else {
-            /* unterminated block comment -> cut rest */
-            *s = '\0';
+    int in_single = 0;
+    int in_double = 0;
+
+    for (int i = 0; line[i]; i++) {
+        char c = line[i];
+
+        // toggle quote-state if not escaped
+        if (c == '\'' && !in_double && (i == 0 || line[i-1] != '\\')) {
+            in_single = !in_single;
+        } else if (c == '"' && !in_single && (i == 0 || line[i-1] != '\\')) {
+            in_double = !in_double;
+        }
+
+        // check for real "//"
+        if (!in_single && !in_double && line[i] == '/' && line[i+1] == '/') {
+            line[i] = '\0';
             break;
         }
-        s = strstr(line, "/*");
     }
-    rtrim(line);
+
+    // Remove trailing spaces
+    int len = strlen(line);
+    while (len > 0 && isspace((unsigned char)line[len-1])) {
+        line[--len] = '\0';
+    }
 }
+
 
 /*
  * apply_replacements:
