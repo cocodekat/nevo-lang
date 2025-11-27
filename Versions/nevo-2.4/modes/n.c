@@ -476,7 +476,7 @@ int main(int argc, char *argv[]) {
         // Ensure final closing brace exists (don't duplicate if already present).
         // We'll append a single '}\n' to close the program in case the input didn't provide it.
         
-        fprintf(out, "}\n");
+        // fprintf(out, "}\n");
         fclose(out);
 
         // --- Auto-compile the generated C++ file ---
