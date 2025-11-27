@@ -11,6 +11,8 @@
 #include "../ban_list.h"
 #include "../replacements.h"
 
+#include "nhtmlt.h"
+
 const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 
 // --- Helper for cross-platform paths ---
@@ -196,22 +198,23 @@ int extract_window_content(char **lines, int n, const char *html_path) {
 
                     // Write everything AFTER the '{'
                     char *content = brace + 1;
-                    if (*content != '\0')
-                        fprintf(html, "%s\n", content);
+
+                    if (*content != '\0') {
+                        char *out = nhtmlt(content);
+                        fprintf(html, "%s\n", out);
+                        free(out);
+                    }
 
                 } else {
-                    // window() found, but opening brace is NOT here
-                    // No writing yet — wait until we find the '{' on a later line
                     found_open_brace = 0;
                 }
 
-                // Clear the source line
                 free(lines[i]);
                 lines[i] = strdup("");
                 continue;
             }
 
-            continue; // Not inside window() and no match — nothing to do
+            continue;
         }
 
         // ---------------------------------------------------------------------
@@ -219,20 +222,20 @@ int extract_window_content(char **lines, int n, const char *html_path) {
         // ---------------------------------------------------------------------
         if (inside) {
 
-            // If we haven't seen the first '{' yet, look for it
             if (!found_open_brace) {
                 char *brace = strchr(line, '{');
                 if (brace) {
                     found_open_brace = 1;
                     brace_depth = 1;
 
-                    // Write everything after the '{'
                     char *content = brace + 1;
-                    fprintf(html, "%s\n", content);
+
+                    char *out = nhtmlt(content);
+                    fprintf(html, "%s\n", out);
+                    free(out);
 
                 } else {
-                    // Still no opening brace, this line belongs to window() but empty
-                    // Do NOT write it to the HTML
+                    // No '{' yet — do nothing
                 }
 
                 free(lines[i]);
@@ -241,19 +244,18 @@ int extract_window_content(char **lines, int n, const char *html_path) {
             }
 
             // -----------------------------------------------------------------
-            // We have entered the brace block and can accumulate content
+            // We have entered the brace block
             // -----------------------------------------------------------------
 
             int original_depth = brace_depth;
 
-            // Count brace depth BEFORE writing the line
+            // Count brace depth BEFORE writing
             for (char *p = line; *p; p++) {
                 if (*p == '{') brace_depth++;
                 else if (*p == '}') brace_depth--;
             }
 
-            // If this is ONLY the closing brace of the block:
-            // e.g. "}" or "   }"
+            // Check if this is the closing "}" of window()
             char *trim = line;
             while (isspace((unsigned char)*trim)) trim++;
 
@@ -264,14 +266,19 @@ int extract_window_content(char **lines, int n, const char *html_path) {
                  brace_depth == 0);
 
             if (!is_closing_block) {
-                fprintf(html, "%s\n", line);
+
+                // ----------------------------
+                // RUN TRANSPILER HERE
+                // ----------------------------
+                char *out = nhtmlt(line);
+                fprintf(html, "%s\n", out);
+                free(out);
             }
 
-            // Clear the line from the source
             free(lines[i]);
             lines[i] = strdup("");
 
-            // If brace depth returned to 0, the block is finished
+            // Done with window() block
             if (brace_depth <= 0) {
                 inside = 0;
                 continue;
@@ -282,6 +289,7 @@ int extract_window_content(char **lines, int n, const char *html_path) {
     fclose(html);
     return 0;
 }
+
 
 void escape_cpp_string(const char *input, char *output, size_t outcap) {
     if (!input || !output || outcap == 0) return;
