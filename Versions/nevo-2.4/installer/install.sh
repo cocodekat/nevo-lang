@@ -7,7 +7,6 @@ cd "$SCRIPT_DIR"
 TARGET_DIR="$HOME/nevo"
 
 # ── Building needed folders
-mkdir -p "$TARGET_DIR/Libraries/Images"
 mkdir -p "$TARGET_DIR/Modes"
 
 ls ../modes/n.c ../auto_var.c ../ban_list.c
@@ -19,7 +18,8 @@ clang "../modes/n.c" "../auto_var.c" "../ban_list.c" -o "$TARGET_DIR/Modes/n"
 
 # ── Moving the needed .h files
 echo "Enabling Builtin Functions..."
-mv "../Libraries/" "$TARGET_DIR"
+rm -rf "$TARGET_DIR/Libraries"
+mv "../Libraries" "$TARGET_DIR"
 
 # ── Add nevo executable to PATH if not already there
 if ! grep -Fxq "export PATH=\"$TARGET_DIR:\$PATH\"" "$HOME/.bashrc"; then

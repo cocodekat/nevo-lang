@@ -150,73 +150,121 @@ void apply_replacements(char **lineptr) {
 }
 
 int extract_window_content(char **lines, int n, const char *html_path) {
-    if (!lines || n <= 0 || !html_path) return -1;
-    int brace_count = 0;
-    int inside = 0;
+    if (!lines || n <= 0 || !html_path)
+        return -1;
+
     FILE *html = fopen(html_path, "w");
-    if (!html) { perror("fopen html"); return -1; }
+    if (!html) {
+        perror("fopen html");
+        return -1;
+    }
+
+    int inside = 0;         // Whether we are inside window() { ... }
+    int brace_depth = 0;    // How many nested braces
+    int found_open_brace = 0;
 
     for (int i = 0; i < n; i++) {
-        char *line = lines[i];
-        if (!line) continue;
 
+        char *line = lines[i];
+        if (!line)
+            continue;
+
+        // ---------------------------------------------------------------------
+        // PHASE 1 — Detect the "window(...)" line
+        // ---------------------------------------------------------------------
         if (!inside) {
-            char *pos = strstr(line, "window()");
+            char *pos = strstr(line, "window(");
+
             if (pos) {
                 inside = 1;
-                char *brace_start = strchr(pos, '{');
-                if (brace_start) {
-                    // there is an opening brace on this line
-                    brace_count = 1;
-                    char *content_after = brace_start + 1;
-                    if (*content_after != '\0') {
-                        fprintf(html, "%s\n", content_after);
-                    }
+
+                // Try to find the opening '{' on THIS line
+                char *brace = strchr(pos, '{');
+                if (brace) {
+                    brace_depth = 1;
+                    found_open_brace = 1;
+
+                    // Write everything AFTER the '{'
+                    char *content = brace + 1;
+                    if (*content != '\0')
+                        fprintf(html, "%s\n", content);
+
                 } else {
-                    // window() found but brace not on same line: look ahead for brace
-                    // write nothing from this line, keep it empty
+                    // window() found, but opening brace is NOT here
+                    // No writing yet — wait until we find the '{' on a later line
+                    found_open_brace = 0;
                 }
-                // mark this source line as consumed -> replace it with empty string safely
+
+                // Clear the source line
                 free(lines[i]);
                 lines[i] = strdup("");
-                if (!lines[i]) lines[i] = NULL;
                 continue;
             }
-        } else {
-            // we are inside window() block
-            // Count braces on this line first
-            for (char *c = line; *c; c++) {
-                if (*c == '{') brace_count++;
-                else if (*c == '}') brace_count--;
-            }
 
-            // Trim leading whitespace to detect lines that are only the final closing brace
-            char *only_brace = line;
-            while (isspace((unsigned char)*only_brace)) only_brace++;
+            continue; // Not inside window() and no match — nothing to do
+        }
 
-            // If the line is exactly a single '}' possibly followed by whitespace, skip writing it.
-            int write_line = 1;
-            if (*only_brace == '}' && (only_brace[1] == '\0' || isspace((unsigned char)only_brace[1]))) {
-                // if this is the final closing brace and it's the one that reduces brace_count to 0,
-                // skip writing it. But if there are other characters on the line (e.g., "};"), write it.
-                // We will skip only if the line contains nothing but whitespace and '}'.
-                // detect if any non-whitespace other than '}' exists
-                int non_ws_other = 0;
-                for (char *c = line; *c; c++) {
-                    if (!isspace((unsigned char)*c) && *c != '}') { non_ws_other = 1; break; }
+        // ---------------------------------------------------------------------
+        // PHASE 2 — Inside window() extraction
+        // ---------------------------------------------------------------------
+        if (inside) {
+
+            // If we haven't seen the first '{' yet, look for it
+            if (!found_open_brace) {
+                char *brace = strchr(line, '{');
+                if (brace) {
+                    found_open_brace = 1;
+                    brace_depth = 1;
+
+                    // Write everything after the '{'
+                    char *content = brace + 1;
+                    fprintf(html, "%s\n", content);
+
+                } else {
+                    // Still no opening brace, this line belongs to window() but empty
+                    // Do NOT write it to the HTML
                 }
-                if (!non_ws_other) write_line = 0;
+
+                free(lines[i]);
+                lines[i] = strdup("");
+                continue;
             }
 
-            if (write_line) fprintf(html, "%s\n", line);
+            // -----------------------------------------------------------------
+            // We have entered the brace block and can accumulate content
+            // -----------------------------------------------------------------
 
-            // mark this source line as consumed -> replace it with empty string safely
+            int original_depth = brace_depth;
+
+            // Count brace depth BEFORE writing the line
+            for (char *p = line; *p; p++) {
+                if (*p == '{') brace_depth++;
+                else if (*p == '}') brace_depth--;
+            }
+
+            // If this is ONLY the closing brace of the block:
+            // e.g. "}" or "   }"
+            char *trim = line;
+            while (isspace((unsigned char)*trim)) trim++;
+
+            int is_closing_block =
+                (*trim == '}' &&
+                 (trim[1] == '\0' || isspace((unsigned char)trim[1])) &&
+                 original_depth == 1 &&
+                 brace_depth == 0);
+
+            if (!is_closing_block) {
+                fprintf(html, "%s\n", line);
+            }
+
+            // Clear the line from the source
             free(lines[i]);
             lines[i] = strdup("");
-            if (!lines[i]) lines[i] = NULL;
 
-            if (brace_count <= 0) {
+            // If brace depth returned to 0, the block is finished
+            if (brace_depth <= 0) {
                 inside = 0;
+                continue;
             }
         }
     }
