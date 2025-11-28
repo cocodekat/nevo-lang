@@ -425,61 +425,82 @@ int main(int argc, char *argv[]) {
         if (need.cap_defined) fprintf(out, "#define cap false\n");
         if (need.nocap_defined) fprintf(out, "#define nocap true\n");
 
-        // --- Write body lines, injecting webview boilerplate inside main if found ---
-        int main_index = -1;
+        // --- Write body lines, but inject webview at END of main() ---
+        int main_start = -1;
+        int main_brace_depth = 0;
+
+        // First, find main start
         for (int i = 0; i < n; i++) {
-            if (lines[i] && strstr(lines[i], "int main(")) { main_index = i; break; }
+            if (lines[i] && strstr(lines[i], "int main(")) {
+                main_start = i;
+                break;
+            }
         }
 
-        for (int i = 0; i < n; i++) {
-            if (!lines[i]) continue;
-            if (lines[i][0] == '\0') continue; // consumed by extractor or empty
+        int inside_main = 0;
 
-            if (i == main_index) {
-                // write the main signature line(s)
+        for (int i = 0; i < n; i++) {
+            if (!lines[i] || lines[i][0] == '\0') continue;
+
+            // detect main() start
+            if (i == main_start) {
                 fprintf(out, "%s\n", lines[i]);
 
-                // if brace not on same line, check next non-empty line for it
-                if (!strchr(lines[i], '{')) {
-                    // attempt to find the line with '{'
+                // check if brace on same line
+                if (strchr(lines[i], '{')) {
+                    inside_main = 1;
+                    main_brace_depth = 1;
+                } else {
+                    // look ahead for next line with '{'
                     int j = i + 1;
                     while (j < n && lines[j] && lines[j][0] == '\0') j++;
                     if (j < n && lines[j]) {
                         fprintf(out, "%s\n", lines[j]);
-                        // mark that we already wrote lines[j] so it won't get written again
+                        inside_main = 1;
+                        main_brace_depth = 1;
                         free(lines[j]); lines[j] = strdup("");
-                        if (!lines[j]) lines[j] = NULL;
                     }
                 }
-
-                // inject webview boilerplate
-#ifndef _WIN32
-                fprintf(out, "    std::string home = getenv(\"HOME\");\n");
-                fprintf(out, "    std::string path = \"file://\" + home + \"/nevo/temp.html\";\n");
-#else
-                fprintf(out, "    std::string path = \"file://C:/nevo/temp.html\";\n");
-#endif
-                fprintf(out, "    webview::webview w(false, nullptr);\n");
-
-                char escaped[1024];
-                escape_cpp_string(out_name, escaped, sizeof(escaped));
-                fprintf(out, "    w.set_title(\"%s\");\n", escaped);
-                fprintf(out, "    w.set_size(800, 600, WEBVIEW_HINT_NONE);\n");
-                fprintf(out, "    w.navigate(path);\n");
-                fprintf(out, "    w.run();\n\n");
-
-                // We intentionally do not 'continue' here because we already wrote the main line(s),
-                // But we should skip writing the same line again later. To avoid duplication,
-                // mark this line as consumed:
                 free(lines[i]); lines[i] = strdup("");
-                if (!lines[i]) lines[i] = NULL;
                 continue;
+            }
+
+            if (inside_main) {
+                // count braces
+                for (char *p = lines[i]; *p; p++) {
+                    if (*p == '{') main_brace_depth++;
+                    else if (*p == '}') main_brace_depth--;
+                }
+
+                // if this line closes main(), inject before writing the closing brace
+                if (main_brace_depth == 0) {
+                    // --- Inject webview here ---
+        #ifndef _WIN32
+                    fprintf(out, "    std::string home = getenv(\"HOME\");\n");
+                    fprintf(out, "    std::string path = \"file://\" + home + \"/nevo/temp.html\";\n");
+        #else
+                    fprintf(out, "    std::string path = \"file://C:/nevo/temp.html\";\n");
+        #endif
+                    fprintf(out, "    webview::webview w(false, nullptr);\n");
+                    char escaped[1024];
+                    escape_cpp_string(out_name, escaped, sizeof(escaped));
+                    fprintf(out, "    w.set_title(\"%s\");\n", escaped);
+                    fprintf(out, "    w.set_size(800, 600, WEBVIEW_HINT_NONE);\n");
+                    fprintf(out, "    w.navigate(path);\n");
+                    fprintf(out, "    w.run();\n\n");
+
+                    // now write the closing brace
+                    fprintf(out, "%s\n", lines[i]);
+                    inside_main = 0;
+                    free(lines[i]); lines[i] = strdup("");
+                    continue;
+                }
             }
 
             // normal write
             fprintf(out, "%s\n", lines[i]);
-            // free here would be fine, but we'll free all at cleanup to keep consistent ownership.
         }
+
 
         // Ensure final closing brace exists (don't duplicate if already present).
         // We'll append a single '}\n' to close the program in case the input didn't provide it.
