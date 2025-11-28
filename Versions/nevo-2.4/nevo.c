@@ -20,9 +20,9 @@ int main(int argc, char **argv) {
     // -------------------------
     if (strcmp(mode, "-n") == 0) {
         #if defined(_WIN32) || defined(_WIN64)
-            snprintf(cmd, sizeof(cmd), "C:\\nevo\\Modes\\n %s, %s", input, output);
+            snprintf(cmd, sizeof(cmd), "C:\\nevo\\Modes\\n %s %s", input, output);
         #else
-            snprintf(cmd, sizeof(cmd), "$HOME/nevo/Modes/n %s, %s", input, output);
+            snprintf(cmd, sizeof(cmd), "$HOME/nevo/Modes/n %s %s", input, output);
         #endif
             int ret = system(cmd);
             if (ret != 0) {
