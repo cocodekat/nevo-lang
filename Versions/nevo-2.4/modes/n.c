@@ -25,7 +25,7 @@ const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 // --- Include indices ---
 enum {
     INC_STD, INC_STDL, INC_STR, INC_MATH, INC_CTP, INC_TIME, INC_ASSERT,
-    INC_ARR, INC_H1, INC_SHA, INC_NPXM, INC_BOOL, INC_BOPS, INC_UNLESS
+    INC_ARR, INC_H1, INC_SHA, INC_NPXM, INC_BOOL, INC_BOPS, INC_UNLESS, INC_DESTRUCT
 };
 
 // --- Linux paths ---
@@ -35,7 +35,7 @@ static const char *linux_paths[] = {
     "#include <assert.h>", "/nevo/libraries/arradd.h", "/nevo/libraries/h1.h",
     "/nevo/libraries/sha256.h", "/nevo/libraries/images/npxm.h",
     "/nevo/libraries/bool.h", "/nevo/libraries/better_ops.h",
-    "/nevo/libraries/unless.h"
+    "/nevo/libraries/unless.h", "/nevo/libraries/destruct.h"
 };
 
 // --- Windows paths ---
@@ -50,7 +50,7 @@ static const char *win_paths[] = {
     "#include \"C:\\nevo\\libraries\\arradd.h\"", "#include \"C:\\nevo\\libraries\\h1.h\"",
     "#include \"C:\\nevo\\libraries\\sha256.h\"", "#include \"C:\\nevo\\libraries\\images\\npxm.h\"",
     "#include \"C:\\nevo\\libraries\\bool.h\"", "#include \"C:\\nevo\\libraries\\better_ops.h\"",
-    "#include \"C:\\nevo\\libraries\\unless.h\""
+    "#include \"C:\\nevo\\libraries\\unless.h\"", "#include \"C:\\nevo\\libraries\\destruct.h\""
 };
 
 // --- Utility helpers ---
@@ -411,6 +411,7 @@ int main(int argc, char *argv[]) {
                 case INC_BOOL: flag = need.bool_defined; break;
                 case INC_BOPS: flag = need.bops_defined; break;
                 case INC_UNLESS: flag = need.unless_defined; break;
+                case INC_DESTRUCT: flag = need.destruct_defined; break;
             }
             if (flag) {
 #ifdef _WIN32

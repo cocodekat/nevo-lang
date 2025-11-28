@@ -21,6 +21,7 @@ typedef struct {
     bool bool_defined;
     bool bops_defined;
     bool unless_defined;
+    bool destruct_defined;
 } headers_needed_t;
 
 static void calculate_needed_headers(const char *code_lines[], int num_lines, headers_needed_t *out) {
@@ -40,6 +41,7 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     out->bool_defined = false;
     out->bops_defined = false;
     out->unless_defined = false;
+    out->destruct_defined = false;
 
     const char *stdio_funcs[] = {"printf","scanf","fprintf","fscanf","sprintf","sscanf","snprintf","putchar","getchar","puts","gets","fgets","fputs"};
     const char *stdlib_funcs[] = {"malloc","calloc","realloc","free","atoi","atol","atoll","strtol","strtoll","strtoul","strtoull","strtod","strtof","strtold","exit","abort","system","rand","srand","qsort","bsearch"};
@@ -61,6 +63,8 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
     const char* bops_define[] = {"AND", "XOR", "NOT", "OR", "NAND", "NOR", "XNOR", "IMPLIES", "NIMPLIES", "CONVERSE_IMPLIES", "BICONDITIONAL", "NOT_BICONDITIONAL", "BUFFER", "INVERT"};
 
     const char* unless_define[] = {"unless"};
+
+    const char* destruct_define[] = {"destruct()"};
 
     for (int i = 0; i < num_lines; i++) {
         const char *line = code_lines[i];
@@ -114,6 +118,9 @@ static void calculate_needed_headers(const char *code_lines[], int num_lines, he
         
         for (int j = 0; j < sizeof(unless_define)/sizeof(unless_define[0]); j++)
             if (strstr(line, unless_define[j])) out->unless_defined = true;
+
+        for (int j = 0; j < sizeof(destruct_define)/sizeof(destruct_define[0]); j++)
+            if (strstr(line, destruct_define[j])) out->destruct_defined = true;
 
 
     }
