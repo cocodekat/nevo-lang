@@ -501,7 +501,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef _WIN32
         snprintf(compile_cmd, sizeof(compile_cmd),
-                 "tcc %s -o %s.exe -lole32 -loleaut32 -luuid -lcomctl32 -luser32 -lgdi32", CFILE, out_name);
+                 "C:\\nevo\\tcc\\tcc\\tcc.exe %s -o %s.exe -lole32 -loleaut32 -luuid -lcomctl32 -luser32 -lgdi32", CFILE, out_name);
 #else
         snprintf(compile_cmd, sizeof(compile_cmd),
                  "clang++ %s -std=c++17 -framework WebKit -o %s", CFILE, out_name);
