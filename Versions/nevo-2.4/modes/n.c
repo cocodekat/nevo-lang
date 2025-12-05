@@ -1,6 +1,3 @@
-// fixed_webview_generator.c
-// Safer rewrite of your original program with memory-safety fixes.
-
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
@@ -10,8 +7,6 @@
 #include "../auto_var.h"
 #include "../ban_list.h"
 #include "../replacements.h"
-
-#include "nhtmlt.h"
 
 const int replacements_count = sizeof(replacements) / sizeof(replacement_t);
 
@@ -151,8 +146,6 @@ void apply_replacements(char **lineptr) {
                 p = pos + from_len;
             }
         }
-
-        free(current);
         current = out;
     }
 
@@ -200,9 +193,9 @@ int extract_window_content(char **lines, int n, const char *html_path) {
                     char *content = brace + 1;
 
                     if (*content != '\0') {
-                        char *out = nhtmlt(content);
+                        char *out = content;
+                        
                         fprintf(html, "%s\n", out);
-                        free(out);
                     }
 
                 } else {
@@ -229,10 +222,9 @@ int extract_window_content(char **lines, int n, const char *html_path) {
                     brace_depth = 1;
 
                     char *content = brace + 1;
-
-                    char *out = nhtmlt(content);
+                    char *out = content;
+                    
                     fprintf(html, "%s\n", out);
-                    free(out);
 
                 } else {
                     // No '{' yet — do nothing
@@ -266,13 +258,9 @@ int extract_window_content(char **lines, int n, const char *html_path) {
                  brace_depth == 0);
 
             if (!is_closing_block) {
-
-                // ----------------------------
-                // RUN TRANSPILER HERE
-                // ----------------------------
-                char *out = nhtmlt(line);
+                char *out = line;
+                
                 fprintf(html, "%s\n", out);
-                free(out);
             }
 
             free(lines[i]);
@@ -285,7 +273,6 @@ int extract_window_content(char **lines, int n, const char *html_path) {
             }
         }
     }
-
     fclose(html);
     return 0;
 }
