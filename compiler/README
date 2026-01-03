@@ -1,6 +1,3 @@
 # Project started on monday, 8-12-2025
 
-# Who?
-Made by modulix (cocodekat)
-# What?
-A very tiny custom compiler for the nevo language
+The beta version is not yet an official release so may contain a lot of bugs, it aswell is written only for ARM64 assembly found on newer macbook devices.
