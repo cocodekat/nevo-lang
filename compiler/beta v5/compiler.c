@@ -21,17 +21,6 @@ static IfLabel if_stack[256];
 static int if_counter = 0;
 
 typedef struct {
-    char label_start[64];
-    char label_end[64];
-    char counter_var[64];
-} LoopLabel;
-
-static LoopLabel loop_stack[256];
-static int loop_depth = 0;
-static int loop_seq = 0;
-
-
-typedef struct {
     char name[64];
     char label[64];   // e.g. "ram"
 } Var;
@@ -70,7 +59,6 @@ void emit_all_variables(FILE *fout) {
     if (var_count == 0) return;
     fprintf(fout, ".data\n");
     for (int i = 0; i < var_count; i++) {
-        fprintf(fout, ".align 2\n");
         fprintf(fout, "%s: .word 0\n", vars[i].label);
     }
 }
@@ -115,22 +103,13 @@ char *get_var_label(const char *name) {
     return NULL;
 }
 
+// Assign a new register to a variable (w1..w30). Return pointer to reg string.
 char *assign_var(const char *name) {
     if (!name) return NULL;
-
-    // already exists?
-    for (int i = 0; i < var_count; i++) {
-        if (strcmp(vars[i].name, name) == 0)
-            return vars[i].label;
-    }
-
-    if (var_count >= 256) {
-        fprintf(stderr, "Too many variables\n");
-        exit(1);
-    }
+    if (var_count >= 256) { fprintf(stderr, "Too many variables\n"); exit(1); }
 
     snprintf(vars[var_count].name, sizeof(vars[var_count].name), "%s", name);
-    snprintf(vars[var_count].label, sizeof(vars[var_count].label), "%s", name);
+    snprintf(vars[var_count].label, sizeof(vars[var_count].label), "var_%d", var_count);
 
     var_count++;
     return vars[var_count - 1].label;
@@ -154,14 +133,6 @@ bool is_register(const char *s) {
     if (!s) return false;
     if ((s[0] == 'w' || s[0] == 'x') && isdigit((unsigned char)s[1])) return true;
     return false;
-}
-
-int is_var(const char *s) {
-    if (!s || !*s) return 0;
-    if (is_number(s)) return 0;
-    if (is_register(s)) return 0;
-    if (s[0] == '[') return 0;
-    return get_var_label(s) != NULL;
 }
 
 int main(int argc, char **argv) {
@@ -236,24 +207,6 @@ int main(int argc, char **argv) {
         }
 
         if (strcmp(line, "}") == 0) {
-            if (loop_depth > 0) {
-                LoopLabel *L = &loop_stack[loop_depth - 1];
-
-                // decrement counter
-                fprintf(fout, "    adrp x9, %s@PAGE\n", L->counter_var);
-                fprintf(fout, "    ldr w0, [x9, %s@PAGEOFF]\n", L->counter_var);
-                fprintf(fout, "    sub w0, w0, #1\n");
-                fprintf(fout, "    str w0, [x9, %s@PAGEOFF]\n", L->counter_var);
-
-                // jump back
-                fprintf(fout, "    b %s\n", L->label_start);
-
-                // exit label
-                fprintf(fout, "%s:\n", L->label_end);
-
-                loop_depth--;
-                continue;
-            }
             if (if_counter > 0) {
                 IfLabel *curr = &if_stack[if_counter - 1];
 
@@ -299,87 +252,6 @@ int main(int argc, char **argv) {
             continue;
         }
 
-        if (strncmp(line, "loop ", 5) == 0) {
-            char expr[256];
-
-            // strip "loop " and optional "{"
-            strcpy(expr, line + 5);
-            char *brace = strchr(expr, '{');
-            if (brace) *brace = '\0';
-            trim(expr);
-
-            LoopLabel *L = &loop_stack[loop_depth++];
-
-            // create unique labels
-            snprintf(L->label_start, sizeof(L->label_start), "_loop_%d", loop_seq);
-            snprintf(L->label_end, sizeof(L->label_end), "_loop_end_%d", loop_seq);
-
-            // create hidden counter variable
-            snprintf(L->counter_var, sizeof(L->counter_var), "_loop_counter_%d", loop_seq);
-            assign_var(L->counter_var);
-
-            loop_seq++;
-
-            /* ---- evaluate expression into w0 ---- */
-
-            char a[128], b[128];
-            char op;
-
-            if (sscanf(expr, "%127s %c %127s", a, &op, b) == 3) {
-                const char *asmop = NULL;
-                if (op == '+') asmop = "add";
-                else if (op == '-') asmop = "sub";
-                else if (op == '*') asmop = "mul";
-                else if (op == '/') asmop = "sdiv";
-                else error_syntax(line_num, "Invalid operator in loop");
-
-                // load a → w0
-                if (is_number(a)) {
-                    fprintf(fout, "    mov w0, #%s\n", a);
-                } else {
-                    char *al = get_var_label(a);
-                    if (!al) error_undef(line_num, a);
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", al);
-                    fprintf(fout, "    ldr w0, [x9, %s@PAGEOFF]\n", al);
-                }
-
-                // load b → w1
-                if (is_number(b)) {
-                    fprintf(fout, "    mov w1, #%s\n", b);
-                } else {
-                    char *bl = get_var_label(b);
-                    if (!bl) error_undef(line_num, b);
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", bl);
-                    fprintf(fout, "    ldr w1, [x9, %s@PAGEOFF]\n", bl);
-                }
-
-                fprintf(fout, "    %s w0, w0, w1\n", asmop);
-            } else {
-                // simple value
-                if (is_number(expr)) {
-                    fprintf(fout, "    mov w0, #%s\n", expr);
-                } else {
-                    char *el = get_var_label(expr);
-                    if (!el) error_undef(line_num, expr);
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", el);
-                    fprintf(fout, "    ldr w0, [x9, %s@PAGEOFF]\n", el);
-                }
-            }
-
-            // store initial counter
-            fprintf(fout, "    adrp x9, %s@PAGE\n", L->counter_var);
-            fprintf(fout, "    str w0, [x9, %s@PAGEOFF]\n", L->counter_var);
-
-            // loop start label
-            fprintf(fout, "%s:\n", L->label_start);
-
-            // if counter == 0 → exit loop
-            fprintf(fout, "    adrp x9, %s@PAGE\n", L->counter_var);
-            fprintf(fout, "    ldr w0, [x9, %s@PAGEOFF]\n", L->counter_var);
-            fprintf(fout, "    cbz w0, %s\n", L->label_end);
-
-            continue;
-        }
 
         if (strncmp(line, "exit(", 5) == 0 && line[strlen(line)-1] == ')') {
             fprintf(fout,
@@ -661,29 +533,18 @@ int main(int argc, char **argv) {
                 fprintf(fout, "    str  w2, [x9, %s@PAGEOFF]\n", vlabel);
             } else {
                 // simple assign: num x = <literal/register/var>
-                // simple assign: num x = <literal/register/var>
                 if (is_number(rhs)) {
-
                     fprintf(fout, "    mov w0, #%s\n", rhs);
                     fprintf(fout, "    adrp x9, %s@PAGE\n", vlabel);
                     fprintf(fout, "    str  w0, [x9, %s@PAGEOFF]\n", vlabel);
-
                 } else if (is_register(rhs)) {
-
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", vlabel);
-                    fprintf(fout, "    str  %s, [x9, %s@PAGEOFF]\n", rhs, vlabel);
-
+                    fprintf(fout, "    str %s, %s\n", rhs, vlabel);
                 } else {
-
-                    // variable RHS: load then store
+                    // variable RHS must be defined (load and store)
                     char *rlabel = get_var_label(rhs);
                     if (!rlabel) error_undef(line_num, rhs);
-
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", rlabel);
-                    fprintf(fout, "    ldr  w0, [x9, %s@PAGEOFF]\n", rlabel);
-
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", vlabel);
-                    fprintf(fout, "    str  w0, [x9, %s@PAGEOFF]\n", vlabel);
+                    fprintf(fout, "    ldr w0, %s\n", rlabel);
+                    fprintf(fout, "    str w0, %s\n", vlabel);
                 }
             }
             continue;
@@ -738,51 +599,55 @@ int main(int argc, char **argv) {
                     fprintf(fout, "    ldr  %s, [x9, %s@PAGEOFF]\n", lhs, rlabel);
                 }
             } else {
-                // setm MEM, SRC
-                int lhs_is_mem = (lhs[0] == '[');
-                int lhs_is_var = is_var(lhs);
-
-                if (!lhs_is_mem && !lhs_is_var) {
-                    fprintf(stderr,
-                        "Error: setm destination must be memory (line %d): %s\n",
-                        line_num, lhs);
-                    return 1;
-                }
-
-                /* ---- load RHS into w0 if needed ---- */
-
-                if (is_number(rhs)) {
-
+                // setm lhs = rhs  OR setm lhs, rhs
+                // lhs is a memory destination (could be a variable label or a memory expression)
+                if (rhs[0] == '[') {
+                    // mem->mem not supported
+                    fprintf(fout, "    /* unsupported: setm %s = %s (mem->mem) */\n", lhs, rhs);
+                } else if (is_number(rhs)) {
                     fprintf(fout, "    mov w0, #%s\n", rhs);
-
+                    // if lhs is a register-like (user passed a register), store into memory pointed by that register
+                    if (is_register(lhs)) {
+                        fprintf(fout, "    str w0, %s\n", lhs);
+                    } else {
+                        // lhs expected to be a variable label or memory label:
+                        char *llabel = get_var_label(lhs);
+                        if (llabel) {
+                            fprintf(fout, "    str w0, %s\n", llabel);
+                        } else {
+                            // treat lhs as literal memory expression (fallback)
+                            fprintf(fout, "    str w0, %s\n", lhs);
+                        }
+                    }
                 } else if (is_register(rhs)) {
-
-                    fprintf(fout, "    mov w0, %s\n", rhs);
-
-                } else if (is_var(rhs)) {
-
+                    if (is_register(lhs)) {
+                        fprintf(fout, "    str %s, %s\n", rhs, lhs);
+                    } else {
+                        char *llabel = get_var_label(lhs);
+                        if (llabel) {
+                            fprintf(fout, "    str %s, %s\n", rhs, llabel);
+                        } else {
+                            fprintf(fout, "    /* setm: unknown lhs %s */\n", lhs);
+                        }
+                    }
+                } else {
+                    // rhs is a variable: load and then store
                     char *rlabel = get_var_label(rhs);
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", rlabel);
-                    fprintf(fout, "    ldr  w0, [x9, %s@PAGEOFF]\n", rlabel);
+                    if (!rlabel) error_undef(line_num, rhs);
+                    fprintf(fout, "    ldr w0, %s\n", rlabel);
 
-                } else {
-                    error_undef(line_num, rhs);
+                    if (is_register(lhs)) {
+                        // store into memory location described by register-like lhs (fallback)
+                        fprintf(fout, "    str w0, %s\n", lhs);
+                    } else {
+                        char *llabel = get_var_label(lhs);
+                        if (llabel) {
+                            fprintf(fout, "    str w0, %s\n", llabel);
+                        } else {
+                            fprintf(fout, "    /* setm: unknown lhs %s */\n", lhs);
+                        }
+                    }
                 }
-
-                /* ---- store w0 into LHS ---- */
-
-                if (lhs_is_mem) {
-
-                    // e.g. [sp, #4]
-                    fprintf(fout, "    str w0, %s\n", lhs);
-
-                } else {
-                    // lhs is a variable
-                    char *llabel = get_var_label(lhs);
-                    fprintf(fout, "    adrp x9, %s@PAGE\n", llabel);
-                    fprintf(fout, "    str  w0, [x9, %s@PAGEOFF]\n", llabel);
-                }
-
             }
             continue;
         }
