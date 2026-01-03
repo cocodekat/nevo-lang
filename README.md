@@ -11,4 +11,4 @@ For licensing inquiries, partnerships, or permissions, please contact us on disc
 
 # Transpiler made for quick testing and inasnely good result.
 
-It is very well adviced to use the transpiler at the moment, as the compiler is still far in developent. Expected release date for official version 1 of © Nevo compiler not yet determined.
+It is very well adviced to use the transpiler at the moment, as the compiler is still far in developent. Expected release date for official version 1 of © Nevo compiler is not yet determined.
