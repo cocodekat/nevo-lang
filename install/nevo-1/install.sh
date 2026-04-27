@@ -8,7 +8,7 @@ ZIP_URL="https://github.com/cocodekat/nevo-lang/raw/main/versions/nevo-v1.zip?do
 DOWNLOADS_DIR="$HOME/Downloads"
 ZIP_NAME="nevo.zip"
 EXTRACT_DIR="nevo"
-INSTALLER_PATH="$DOWNLOADS_DIR/$EXTRACT_DIR/nevo-v1/installer/install.sh"
+INSTALLER_PATH="$DOWNLOADS_DIR/$EXTRACT_DIR/release v1/installer/install.sh"
 
 # -----------------------------
 # Download ZIP
@@ -44,6 +44,8 @@ else
     echo "❌ Installer not found at $INSTALLER_PATH"
     exit 1
 fi
+
+chmod +x $HOME/nevo/run.sh
 
 # -----------------------------
 # Cleanup (optional)
