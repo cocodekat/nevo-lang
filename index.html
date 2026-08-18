@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~/portfolio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<button class="reveal-toggle" onclick="toggleReveal()" aria-pressed="true">
+  <span class="dot-indicator" aria-hidden="true"></span>
+  <span>flashlight</span>
+</button>
+<div class="code-reveal-glow" aria-hidden="true"></div>
+<div class="code-reveal" aria-hidden="true"></div>
+<div class="page">
+
+  <div class="window">
+    <div class="window-bar">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="window-title">philip@portfolio — 80×24</span>
+    </div>
+    <div class="window-body">
+
+      <p class="prompt"><span class="user">philip@portfolio</span><span class="path">:~$</span> whoami<span class="cursor"></span></p>
+      <h1>Philip Gaina</h1>
+      <p>
+        I love developing in my free time simply because I enjoy building things and figuring out how they work. I’ve been programming for a couple of years, working with different languages and technologies along the way. Over time, I’ve become confident in my ability to turn ideas into working projects. Also, I mostly work on mac.
+      </p>
+
+      <h2># ~/portfolio/projects</h2>
+      <p class="prompt"><span class="user">philip@portfolio</span><span class="path">:~/projects $</span> ls -la<span class="cursor"></span></p>
+
+      <div class="listing">
+        <div class="listing-head">
+          <span></span>
+          <span>name</span>
+          <span>status</span>
+        </div>
+
+        <a class="entry" href="project1-nevo.html">
+          <span class="entry-icon">▸</span>
+          <span>
+            <span class="entry-name">-rw-r--r-- nevo.html</span>
+            <div class="entry-desc">A simple programming language targeting aarch64-apple-darwin, built to learn ARM64 assembly.</div>
+            <div class="entry-tags">
+              <span class="tag">C</span>
+            </div>
+          </span>
+          <span class="entry-meta"><span class="tag status-archived">archived</span></span>
+        </a>
+
+        <a class="entry" href="project2-file-server.html">
+          <span class="entry-icon">▸</span>
+          <span>
+            <span class="entry-name">-rw-r--r-- file-server.html</span>
+            <div class="entry-desc">A FastAPI-based file hosting server with a web interface for browsing and accessing files, including streaming videos. It can be used as a simple personal cloud storage system or even as the foundation for something like a self-hosted Netflix.</div>
+            <div class="entry-tags">
+              <span class="tag">Python</span>
+              <span class="tag">Flask</span>
+            </div>
+          </span>
+          <span class="entry-meta"><span class="tag status-finished">finished</span></span>
+        </a>
+
+        <a class="entry" href="project3-file-server.html">
+          <span class="entry-icon">▸</span>
+          <span>
+            <span class="entry-name">-rw-r--r-- message-server.html</span>
+            <div class="entry-desc">A FastAPI messaging server with authenticated users, message sending, and persistent inbox storage through a REST API.</div>
+            <div class="entry-tags">
+              <span class="tag">Python</span>
+              <span class="tag">Flask</span>
+            </div>
+          </span>
+          <span class="entry-meta"><span class="tag status-finished">finished</span></span>
+        </a>
+
+      </div>
+      <h2># ~/portfolio/skills</h2>
+      <p class="prompt"><span class="user">philip@portfolio</span><span class="path">:~$</span> cat skills.txt<span class="cursor"></span></p>
+ 
+      <div class="skills-grid">
+        <div>
+          <div class="skill-group-title">languages</div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">C</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●●</span><span class="empty">○○</span></span>
+              <span class="skill-label">a little more</span>
+            </span>
+          </div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">Python</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●</span><span class="empty">○○○○</span></span>
+              <span class="skill-label">a little</span>
+            </span>
+          </div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">JavaScript</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●</span><span class="empty">○○○</span></span>
+              <span class="skill-label">some</span>
+            </span>
+          </div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">Godot</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●●</span><span class="empty">○○</span></span>
+              <span class="skill-label">some</span>
+            </span>
+          </div>
+          <div class="skill-row">
+            <span class="skill-name">Unreal Engine</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●●</span><span class="empty">○○</span></span>
+              <span class="skill-label">some</span>
+            </span>
+          </div>
+        </div>
+ 
+        <div>
+          <div class="skill-group-title">what i build</div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">Front-end</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●●</span><span class="empty">○</span></span>
+              <span class="skill-label">can build</span>
+            </span>
+          </div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">Web servers</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●●</span><span class="empty">○</span></span>
+              <span class="skill-label">can build</span>
+            </span>
+          </div>
+ 
+          <div class="skill-row">
+            <span class="skill-name">Back-end</span>
+            <span class="skill-level">
+              <span class="skill-dots"><span class="filled">●●</span><span class="empty">○○</span></span>
+              <span class="skill-label">some</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <h2># ~/portfolio/contact</h2>
+      <p class="prompt"><span class="user">philip@portfolio</span><span class="path">:~$</span> cat contact.txt<span class="cursor"></span></p>
+      <p style="margin-top: 4px;">
+        <a href="mailto:philip.gaina@icloud.com">philip.gaina@icloud.com</a> ·
+        <a href="https://github.com/cocodekat" target="_blank" rel="noopener">github</a> ·
+      </p>
+
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
