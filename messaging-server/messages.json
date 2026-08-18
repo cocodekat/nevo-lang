@@ -1,0 +1,20 @@
+[
+  {
+    "sender": "coco",
+    "receiver": "henk",
+    "message": "test1",
+    "timestamp": 1781387194.049085
+  },
+  {
+    "sender": "coco",
+    "receiver": "henk",
+    "message": "test2",
+    "timestamp": 1781387367.085661
+  },
+  {
+    "sender": "henk",
+    "receiver": "coco",
+    "message": "string",
+    "timestamp": 1781387416.1392379
+  }
+]
