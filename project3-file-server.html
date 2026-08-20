@@ -3,88 +3,87 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>~/portfolio/message-server.html</title>
+<title>DWG-03 — message-server</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-bg="img/message-server1.png">
-<button class="reveal-toggle" onclick="toggleReveal()" aria-pressed="true">
-  <span class="dot-indicator" aria-hidden="true"></span>
-  <span>flashlight</span>
-</button>
-<div class="code-reveal-glow" aria-hidden="true"></div>
-<div class="code-reveal" aria-hidden="true"></div>
-<div class="page">
+<body>
+<div class="sheet">
+  <div class="sheet-border">
 
-  <p class="breadcrumb">
-    <a href="index.html">~/portfolio</a><span class="sep">/</span><span class="current">message-server.html</span>
-  </p>
-
-  <div class="window">
-    <div class="window-bar">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-      <span class="window-title">message-server.html</span>
+    <div class="sheet-topstrip">
+      <span>DEPT. OF PERSONAL SOFTWARE</span>
+      <span class="divider">//</span>
+      <span>DWG-03</span>
+      <span class="divider">//</span>
+      <span>SHEET 1 OF 1</span>
     </div>
-    <div class="window-body">
 
-      <h1><span class="hash">#</span>Message-server</h1>
+    <div class="sheet-body">
+
+      <p class="refline"><a href="index.html">index</a><span class="sep">/</span><span class="current">dwg-03 — message-server</span></p>
+
+      <p class="eyebrow">DRAWING NO. 03</p>
+      <h1>Message&#8209;server</h1>
 
       <div class="meta-row">
         <span><b>role</b> solo dev</span>
         <span><b>year</b> 2026</span>
       </div>
 
-      <div class="tags">
-        <span class="tag status-finished">finished</span>
-        <span class="tag">Python</span>
-        <span class="tag">Flask</span>
+      <div class="tags-row">
+        <span class="chip">Python</span>
+        <span class="chip">FastAPI</span>
+        <span class="stamp stamp-finished">Finished</span>
       </div>
 
-      <h2># overview</h2>
+      <h2><span class="num">§01</span>Overview</h2>
       <p>
-        A FastAPI-based messaging backend that allows authenticated users to send and receive messages through a REST API. 
-        Users authenticate using HTTP Basic Authentication, while messages are stored persistently with sender, recipient, content, and timestamps. 
-        The server exposes separate endpoints for authentication, sending messages, and retrieving a user's inbox. 
-        The project was built as a backend/API project without a graphical interface.
+        A FastAPI-based messaging backend that lets authenticated users send and receive messages through a REST API. Users authenticate with HTTP Basic Auth, and messages are stored persistently with sender, recipient, content, and timestamp. Separate endpoints handle authentication, sending, and retrieving a user's inbox. Built as a backend/API project without a graphical interface.
       </p>
 
-      <h2># screenshots</h2>
+      <h2><span class="num">§02</span>Figures</h2>
 
-      <div class="gallery">
-        <div class="shot">
-          <img src="img/message-server1.png" alt="Nevo — screenshot 1" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
-          <div class="placeholder">
-            <span class="glyph">▢</span>
-            <span>img/alpha-01.png</span>
+      <div class="figures">
+        <div class="figure">
+          <div class="fig-frame">
+            <img src="img/message-server1.png" alt="Sending messages with curl against the /api/send endpoint" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
+            <span class="tick nw"></span><span class="tick ne"></span><span class="tick sw"></span><span class="tick se"></span>
           </div>
+          <div class="fig-caption"><b>FIG. 1</b> — sending a message via curl</div>
         </div>
-        <div class="shot">
-          <img src="img/message-server2.png" alt="Nevo — screenshot 1" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
-          <div class="placeholder">
-            <span class="glyph">▢</span>
-            <span>img/alpha-02.png</span>
+        <div class="figure">
+          <div class="fig-frame">
+            <img src="img/message-server2.png" alt="messages.json storing persisted messages, uvicorn request log" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
+            <span class="tick nw"></span><span class="tick ne"></span><span class="tick sw"></span><span class="tick se"></span>
           </div>
+          <div class="fig-caption"><b>FIG. 2</b> — persisted inbox, messages.json</div>
         </div>
-        
       </div>
 
-      <h2># download</h2>
-      <div class="download-block">
-        <p class="download-cmd"><span class="op">$</span> curl -O project-file-server.zip</p>
-        <a class="btn download-btn" href="https://github.com/cocodekat/portfolio/tree/main/file-server">View source on GitHub</a>
+      <h2><span class="num">§03</span>Source</h2>
+      <div class="spec-block">
+        <p class="spec-cmd"><span class="op">$</span> curl -O project-message-server.zip</p>
+        <a class="btn" href="https://github.com/cocodekat/portfolio/tree/main/message-server">View source on GitHub</a>
       </div>
 
-      <a class="back-link" href="index.html">← back to all projects</a>
+      <a class="back-link" href="index.html">&larr; return to index</a>
 
+      <div class="sheet-footer-space"></div>
     </div>
-  </div>
 
-  <div class="site-footer">
-    <span><a href="index.html">~/portfolio</a></span>
-    <span>file-server.html</span>
-  </div>
+    <div class="titleblock">
+      <div class="titleblock-left">
+        <a href="index.html">~/portfolio</a>
+      </div>
+      <div class="titleblock-grid">
+        <div class="tb-cell"><span class="tb-label">Drawn by</span><span class="tb-value">Coco</span></div>
+        <div class="tb-cell"><span class="tb-label">Date</span><span class="tb-value">2026</span></div>
+        <div class="tb-cell"><span class="tb-label">Rev</span><span class="tb-value">A</span></div>
+        <div class="tb-cell"><span class="tb-label">Sheet</span><span class="tb-value">DWG-03</span></div>
+      </div>
+    </div>
 
+  </div>
 </div>
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <img id="lightbox-img" src="" alt="">

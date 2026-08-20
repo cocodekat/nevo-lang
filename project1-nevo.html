@@ -3,87 +3,86 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>~/portfolio/nevo.html</title>
+<title>DWG-01 — nevo</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body data-bg="img/nevo1.png">
-<button class="reveal-toggle" onclick="toggleReveal()" aria-pressed="true">
-  <span class="dot-indicator" aria-hidden="true"></span>
-  <span>flashlight</span>
-</button>
-<div class="code-reveal-glow" aria-hidden="true"></div>
-<div class="code-reveal" aria-hidden="true"></div>
-<div class="page">
+<body>
+<div class="sheet">
+  <div class="sheet-border">
 
-  <p class="breadcrumb">
-    <a href="index.html">~/portfolio</a><span class="sep">/</span><span class="current">nevo.html</span>
-  </p>
-
-  <div class="window">
-    <div class="window-bar">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-      <span class="window-title">nevo.html</span>
+    <div class="sheet-topstrip">
+      <span>DEPT. OF PERSONAL SOFTWARE</span>
+      <span class="divider">//</span>
+      <span>DWG-01</span>
+      <span class="divider">//</span>
+      <span>SHEET 1 OF 1</span>
     </div>
-    <div class="window-body">
 
-      <h1><span class="hash">#</span>Nevo</h1>
+    <div class="sheet-body">
+
+      <p class="refline"><a href="index.html">index</a><span class="sep">/</span><span class="current">dwg-01 — nevo</span></p>
+
+      <p class="eyebrow">DRAWING NO. 01</p>
+      <h1>Nevo</h1>
 
       <div class="meta-row">
         <span><b>role</b> solo dev</span>
         <span><b>year</b> 2026</span>
       </div>
 
-      <div class="tags">
-        <span class="tag status-archived">archived</span>
-        <span class="tag">C</span>
+      <div class="tags-row">
+        <span class="chip">C</span>
+        <span class="stamp stamp-archived">Archived</span>
       </div>
 
-      <h2># overview</h2>
+      <h2><span class="num">§01</span>Overview</h2>
       <p>
-        Nevo is a programming language built entirely in C, targeting aarch64-apple-darwin. 
-        I originally created it as a way to learn more about ARM64 assembly and how programming languages work under the hood. 
-        It currently supports core features such as functions, variables, loops, mathematical operations, and printing. 
-        Its syntax isn’t based on any particular language — I experimented with different ideas and gradually shaped it into what it is today.
+        Nevo is a programming language built entirely in C, targeting aarch64-apple-darwin. I originally created it as a way to learn more about ARM64 assembly and how programming languages work under the hood. It currently supports core features such as functions, variables, loops, mathematical operations, and printing. Its syntax isn't based on any particular language — I experimented with different ideas and gradually shaped it into what it is today.
       </p>
 
-      <h2># screenshots</h2>
+      <h2><span class="num">§02</span>Figures</h2>
 
-      <div class="gallery">
-        <div class="shot">
-          <img src="img/nevo1.png" alt="Nevo — screenshot 1" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
-          <div class="placeholder">
-            <span class="glyph">▢</span>
-            <span>img/alpha-01.png</span>
+      <div class="figures">
+        <div class="figure">
+          <div class="fig-frame">
+            <img src="img/nevo1.png" alt="Rock-paper-scissors written in the Nevo language, input.n" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
+            <span class="tick nw"></span><span class="tick ne"></span><span class="tick sw"></span><span class="tick se"></span>
           </div>
+          <div class="fig-caption"><b>FIG. 1</b> — sample program, input.n</div>
         </div>
-        <div class="shot">
-          <img src="img/logo.png" alt="Nevo — screenshot 1" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
-          <div class="placeholder">
-            <span class="glyph">▢</span>
-            <span>img/alpha-02.png</span>
+        <div class="figure">
+          <div class="fig-frame">
+            <img src="img/logo.png" alt="Nevo project mark" onerror="this.classList.add('broken')" onclick="openLightbox(this)">
+            <span class="tick nw"></span><span class="tick ne"></span><span class="tick sw"></span><span class="tick se"></span>
           </div>
+          <div class="fig-caption"><b>FIG. 2</b> — project mark</div>
         </div>
-        
       </div>
 
-      <h2># download</h2>
-      <div class="download-block">
-        <p class="download-cmd"><span class="op">$</span> curl -O project-nevo.zip</p>
-        <a class="btn download-btn" href="https://github.com/cocodekat/portfolio/tree/main/nevo">View source on GitHub</a>
+      <h2><span class="num">§03</span>Source</h2>
+      <div class="spec-block">
+        <p class="spec-cmd"><span class="op">$</span> curl -O project-nevo.zip</p>
+        <a class="btn" href="https://github.com/cocodekat/portfolio/tree/main/nevo">View source on GitHub</a>
       </div>
 
-      <a class="back-link" href="index.html">← back to all projects</a>
+      <a class="back-link" href="index.html">&larr; return to index</a>
 
+      <div class="sheet-footer-space"></div>
     </div>
-  </div>
 
-  <div class="site-footer">
-    <span><a href="index.html">~/portfolio</a></span>
-    <span>nevo.html</span>
-  </div>
+    <div class="titleblock">
+      <div class="titleblock-left">
+        <a href="index.html">~/portfolio</a>
+      </div>
+      <div class="titleblock-grid">
+        <div class="tb-cell"><span class="tb-label">Drawn by</span><span class="tb-value">Coco</span></div>
+        <div class="tb-cell"><span class="tb-label">Date</span><span class="tb-value">2026</span></div>
+        <div class="tb-cell"><span class="tb-label">Rev</span><span class="tb-value">A</span></div>
+        <div class="tb-cell"><span class="tb-label">Sheet</span><span class="tb-value">DWG-01</span></div>
+      </div>
+    </div>
 
+  </div>
 </div>
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <img id="lightbox-img" src="" alt="">
